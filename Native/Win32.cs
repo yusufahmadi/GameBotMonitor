@@ -104,6 +104,7 @@ public static class Win32
     public const uint WM_KEYDOWN = 0x0100;
     public const uint WM_KEYUP = 0x0101;
     public const int VK_TAB = 0x09;
+    public const int VK_A = 0x41;
 
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -169,4 +170,7 @@ public static class Win32
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern uint SendInput(uint nInputs, [MarshalAs(UnmanagedType.LPArray), In] INPUT[] pInputs, int cbSize);
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    public static extern nint FindWindowEx(nint parentHandle, nint childAfter, string className, string windowTitle);
 }

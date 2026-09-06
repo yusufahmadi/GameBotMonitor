@@ -43,11 +43,20 @@ public static class LanguageService
             ["BtnClearLogs"] = "Hapus Log",
 
             // Settings - Language
-            ["SecLanguage"] = "Bahasa / Language",
+            ["SecLanguage"] = "🌐 Bahasa / Language",
             ["LblLanguage"] = "Pilih Bahasa Aplikasi:",
 
+            // Settings - Game & Window Target
+            ["SecGameTarget"] = "🎮 Target Game & Jendela",
+            ["LblGameName"] = "Nama Game (Display Name):",
+            ["HintGameName"] = "Nama game untuk judul aplikasi & notifikasi",
+            ["LblTargetTitle"] = "Target Judul Window Game:",
+            ["HintTargetTitle"] = "Kata kunci judul jendela game yang dicari",
+            ["ChkShowHudBackground"] = "Tampilkan cuplikan info karakter sebagai background kartu slot",
+            ["HintShowHudBackground"] = "Menampilkan gambar live HUD karakter (avatar & bar HP) di latar belakang kartu saat aktif",
+
             // Settings - Detection
-            ["SecDetection"] = "Pengaturan Deteksi & Delay",
+            ["SecDetection"] = "⏱️ Deteksi Kesehatan & Waktu Pindai",
             ["LblScanInterval"] = "Interval Pindai Layar (ms):",
             ["HintScanInterval"] = "Rekomendasi: 1000 - 2000 ms (default 1500)",
             ["LblDelaySeconds"] = "Delay Konfirmasi Kematian (detik):",
@@ -56,12 +65,11 @@ public static class LanguageService
             ["HintCooldownMinutes"] = "Jeda anti-spam setelah alert dikirim",
             ["LblHpCoords"] = "Koordinat Relatif HP Bar (X, Y):",
             ["HintHpCoords"] = "Bisa otomatis diisi via tombol 'Kalibrasi HP'",
-            ["LblGameName"] = "Nama Game (Display Name):",
-            ["HintGameName"] = "Nama game untuk judul aplikasi & notifikasi",
-            ["LblTargetTitle"] = "Target Judul Window Game:",
-            ["HintTargetTitle"] = "Kata kunci judul jendela game yang dicari",
-            ["ChkShowHudBackground"] = "Tampilkan cuplikan info karakter sebagai background kartu slot",
-            ["HintShowHudBackground"] = "Menampilkan gambar live HUD karakter (avatar & bar HP) di latar belakang kartu saat aktif",
+
+            // Settings - Diagnostics / Debug
+            ["SecDiagnostics"] = "🛠️ Mode Diagnostik & Debug",
+            ["ChkEnableDebugLog"] = "Aktifkan Mode Debug Log (Tampilkan detail teknis pixel target & input)",
+            ["HintEnableDebugLog"] = "Jika aktif, koordinat & warna HEX sampling target akan dimunculkan ke log tiap beberapa detik",
 
             // Settings - Auto TAB Assist
             ["SecAutoTab"] = "Auto Assist Target (Auto TAB)",
@@ -186,11 +194,20 @@ public static class LanguageService
             ["BtnClearLogs"] = "Clear Logs",
 
             // Settings - Language
-            ["SecLanguage"] = "Language / Bahasa",
+            ["SecLanguage"] = "🌐 Language / Bahasa",
             ["LblLanguage"] = "Select Application Language:",
 
+            // Settings - Game & Window Target
+            ["SecGameTarget"] = "🎮 Game & Window Target",
+            ["LblGameName"] = "Game Name (Display Name):",
+            ["HintGameName"] = "Game name for app title & alerts",
+            ["LblTargetTitle"] = "Target Game Window Title:",
+            ["HintTargetTitle"] = "Keyword for target game window title",
+            ["ChkShowHudBackground"] = "Show character info snapshot as slot card background",
+            ["HintShowHudBackground"] = "Displays live character HUD (avatar & HP bar) as the card background when active",
+
             // Settings - Detection
-            ["SecDetection"] = "Detection & Delay Settings",
+            ["SecDetection"] = "⏱️ Health Detection & Scan Timing",
             ["LblScanInterval"] = "Screen Scan Interval (ms):",
             ["HintScanInterval"] = "Recommended: 1000 - 2000 ms (default 1500)",
             ["LblDelaySeconds"] = "Death Confirmation Delay (sec):",
@@ -199,12 +216,11 @@ public static class LanguageService
             ["HintCooldownMinutes"] = "Anti-spam delay after alert is sent",
             ["LblHpCoords"] = "HP Bar Relative Coordinates (X, Y):",
             ["HintHpCoords"] = "Can be filled via 'Calibrate HP' button",
-            ["LblGameName"] = "Game Name (Display Name):",
-            ["HintGameName"] = "Game name for app title & alerts",
-            ["LblTargetTitle"] = "Target Game Window Title:",
-            ["HintTargetTitle"] = "Keyword for target game window title",
-            ["ChkShowHudBackground"] = "Show character info snapshot as slot card background",
-            ["HintShowHudBackground"] = "Displays live character HUD (avatar & HP bar) as the card background when active",
+
+            // Settings - Diagnostics / Debug
+            ["SecDiagnostics"] = "🛠️ Diagnostics & Debug Mode",
+            ["ChkEnableDebugLog"] = "Enable Debug Log Mode (Show detailed pixel & input logs)",
+            ["HintEnableDebugLog"] = "When active, coordinate and HEX color sampling info will be output to log window every few seconds",
 
             // Settings - Auto TAB Assist
             ["SecAutoTab"] = "Auto Assist Target (Auto TAB)",

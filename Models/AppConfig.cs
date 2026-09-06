@@ -11,6 +11,7 @@ public class AppConfig
     public int CooldownMinutes { get; set; } = 3;
     public string Language { get; set; } = "id"; // "id" or "en"
     public bool ShowHudBackground { get; set; } = false;
+    public bool EnableDebugLog { get; set; } = false;
 
     public DiscordConfig Discord { get; set; } = new();
     public TelegramConfig Telegram { get; set; } = new();

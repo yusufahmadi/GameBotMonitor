@@ -199,8 +199,17 @@ public partial class MainWindow : Window
         BtnClearLogs.Content = LanguageService.Get("BtnClearLogs");
 
         // Settings - Language
-        SecLanguageHeader.Text = "🌐 " + LanguageService.Get("SecLanguage");
+        SecLanguageHeader.Text = LanguageService.Get("SecLanguage");
         LblLanguage.Text = LanguageService.Get("LblLanguage");
+
+        // Settings - Game & Window Target
+        SecGameTargetHeader.Text = LanguageService.Get("SecGameTarget");
+        LblGameName.Text = LanguageService.Get("LblGameName");
+        HintGameName.Text = LanguageService.Get("HintGameName");
+        LblTargetTitle.Text = LanguageService.Get("LblTargetTitle");
+        HintTargetTitle.Text = LanguageService.Get("HintTargetTitle");
+        ChkShowHudBackground.Content = LanguageService.Get("ChkShowHudBackground");
+        HintShowHudBackground.Text = LanguageService.Get("HintShowHudBackground");
 
         // Settings - Detection
         SecDetectionHeader.Text = LanguageService.Get("SecDetection");
@@ -212,12 +221,6 @@ public partial class MainWindow : Window
         HintCooldownMinutes.Text = LanguageService.Get("HintCooldownMinutes");
         LblHpCoords.Text = LanguageService.Get("LblHpCoords");
         HintHpCoords.Text = LanguageService.Get("HintHpCoords");
-        LblGameName.Text = LanguageService.Get("LblGameName");
-        HintGameName.Text = LanguageService.Get("HintGameName");
-        LblTargetTitle.Text = LanguageService.Get("LblTargetTitle");
-        HintTargetTitle.Text = LanguageService.Get("HintTargetTitle");
-        ChkShowHudBackground.Content = LanguageService.Get("ChkShowHudBackground");
-        HintShowHudBackground.Text = LanguageService.Get("HintShowHudBackground");
 
         // Settings - Auto TAB
         SecAutoTabHeader.Text = "🎯 " + LanguageService.Get("SecAutoTab");
@@ -232,6 +235,11 @@ public partial class MainWindow : Window
         LblAutoTabCoords.Text = LanguageService.Get("LblAutoTabCoords");
         HintAutoTabCoords.Text = LanguageService.Get("HintAutoTabCoords");
         BtnCalibrateTarget.Content = "🎯 " + LanguageService.Get("BtnCalibrateTarget");
+
+        // Settings - Diagnostics / Debug
+        SecDiagnosticsHeader.Text = LanguageService.Get("SecDiagnostics");
+        ChkEnableDebugLog.Content = LanguageService.Get("ChkEnableDebugLog");
+        HintEnableDebugLog.Text = LanguageService.Get("HintEnableDebugLog");
         LblAutoTabSlot1.Text = "🎯 " + LanguageService.Get("AutoTabToggleLabel") + ":";
         LblAutoTabSlot2.Text = "🎯 " + LanguageService.Get("AutoTabToggleLabel") + ":";
         LblAutoTabSlot3.Text = "🎯 " + LanguageService.Get("AutoTabToggleLabel") + ":";
@@ -409,15 +417,22 @@ public partial class MainWindow : Window
                 // WM_CHAR sebagai prioritas (beberapa game merespons WM_CHAR lebih dahulu)
                 nint wParam = (nint)Native.Win32.VK_TAB;
                 nint lParamDown = (nint)0x000F0001; // Scan code 0x0F, repeat 1
-                nint lParamUp   = unchecked((nint)0xC00F0001); // Bit 30+31 = KeyUp
+                nint lParamUp = unchecked((nint)0xC00F0001); // Bit 30+31 = KeyUp
 
                 // Kirim WM_KEYDOWN + WM_KEYUP (standard)
                 Native.Win32.PostMessage(hWnd, Native.Win32.WM_KEYDOWN, wParam, lParamDown);
                 System.Threading.Thread.Sleep(20);
                 Native.Win32.PostMessage(hWnd, Native.Win32.WM_KEYUP, wParam, lParamUp);
-                System.Threading.Thread.Sleep(15);
+                System.Threading.Thread.Sleep(20);
                 // Kirim WM_CHAR sebagai fallback (engine seperti Grand Fantasia kadang hanya merespons WM_CHAR)
                 Native.Win32.PostMessage(hWnd, Native.Win32.WM_CHAR, wParam, lParamDown);
+
+                //// Kirim WM_KEYDOWN
+                //Native.Win32.PostMessage(hWnd, Native.Win32.WM_KEYDOWN, wParam, lParamDown);
+                //System.Threading.Thread.Sleep(20);
+
+                //// Kirim WM_CHAR sebagai karakter hasil dari KeyDown
+                //Native.Win32.PostMessage(hWnd, Native.Win32.WM_CHAR, wParam, lParamDown);
             }
         }
         catch (Exception ex)
@@ -439,6 +454,7 @@ public partial class MainWindow : Window
         TxtGameName.Text = _config.GameName;
         TxtTargetTitle.Text = _config.TargetWindowTitle;
         ChkShowHudBackground.IsChecked = _config.ShowHudBackground;
+        ChkEnableDebugLog.IsChecked = _config.EnableDebugLog;
 
         // Auto TAB
         ChkAutoTabEnabled.IsChecked = _config.AutoTab.Enabled;
@@ -547,6 +563,11 @@ public partial class MainWindow : Window
 
     private void AddLog(string message)
     {
+        if (message.Contains("[DEBUG]") && !(_config?.EnableDebugLog ?? false))
+        {
+            return;
+        }
+
         Dispatcher.Invoke(() =>
         {
             var line = $"[{DateTime.Now:HH:mm:ss}] {message}\n";
@@ -771,6 +792,7 @@ public partial class MainWindow : Window
             _config.GameName = string.IsNullOrWhiteSpace(TxtGameName.Text) ? "Grand Fantasia" : TxtGameName.Text.Trim();
             _config.TargetWindowTitle = TxtTargetTitle.Text.Trim();
             _config.ShowHudBackground = ChkShowHudBackground.IsChecked ?? false;
+            _config.EnableDebugLog = ChkEnableDebugLog.IsChecked ?? false;
 
             // Auto TAB
             _config.AutoTab.Enabled = ChkAutoTabEnabled.IsChecked ?? false;
@@ -867,13 +889,13 @@ public partial class MainWindow : Window
                         bool hasMonsterTarget = PixelHealthScanner.IsTargetMonsterPresent(targetColor, _config.AutoTab.TargetColorHex);
                         slot.HasTarget = hasMonsterTarget;
 
-                        // Debug: log warna setiap 5 detik agar bisa dikalibrasi
-                        bool shouldLogColor = slot.NoTargetSince == null
-                            ? true
-                            : (DateTime.Now - slot.NoTargetSince.Value).TotalSeconds % 5 < (_config.ScanIntervalMs / 1000.0 + 0.5);
-                        if (slot.LastTabSentTime == null || (DateTime.Now - slot.LastTabSentTime.Value).TotalSeconds >= 5)
+                        // Debug: log warna setiap 5 detik jika mode debug diaktifkan
+                        if (_config.EnableDebugLog)
                         {
-                            AddLog($"[DEBUG] Slot {slot.SlotIndex}: Target pixel @({_config.AutoTab.TargetOffsetX},{_config.AutoTab.TargetOffsetY}) = {targetHex} | HasTarget={hasMonsterTarget}");
+                            if (slot.LastTabSentTime == null || (DateTime.Now - slot.LastTabSentTime.Value).TotalSeconds >= 5)
+                            {
+                                AddLog($"[DEBUG] Slot {slot.SlotIndex}: Target pixel @({_config.AutoTab.TargetOffsetX},{_config.AutoTab.TargetOffsetY}) = {targetHex} | HasTarget={hasMonsterTarget}");
+                            }
                         }
 
                         if (hasMonsterTarget)

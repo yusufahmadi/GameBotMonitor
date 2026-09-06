@@ -498,8 +498,8 @@
                         </Grid.RowDefinitions>
                         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="16">
                             <StackPanel>
-                            <!-- Group Bahasa / Language -->
-                            <TextBlock x:Name="SecLanguageHeader" Text="ðŸŒ Bahasa / Language" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <!-- Group 1: Bahasa / Language -->
+                            <TextBlock x:Name="SecLanguageHeader" Text="🌐 Bahasa / Language" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -516,8 +516,35 @@
 
                             <Separator Background="#313244" Margin="0,0,0,16"/>
 
-                            <!-- Group Deteksi & Delay -->
-                            <TextBlock x:Name="SecDetectionHeader" Text="Pengaturan Deteksi &amp; Delay" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <!-- Group 2: Target Game & Jendela -->
+                            <TextBlock x:Name="SecGameTargetHeader" Text="🎮 Target Game &amp; Jendela" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="LblGameName" Text="Nama Game (Display Name):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtGameName" Text="Grand Fantasia"/>
+                                    <TextBlock x:Name="HintGameName" Text="Nama game untuk judul aplikasi &amp; notifikasi" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock x:Name="LblTargetTitle" Text="Target Judul Window Game:" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtTargetTitle" Text="Grand Fantasia Origin"/>
+                                    <TextBlock x:Name="HintTargetTitle" Text="Kata kunci judul jendela game yang dicari" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <CheckBox x:Name="ChkShowHudBackground" Content="Tampilkan cuplikan info karakter sebagai background kartu slot" IsChecked="False" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="HintShowHudBackground" Text="Menampilkan gambar live HUD karakter (avatar &amp; bar HP) di latar belakang kartu saat aktif" FontSize="10" Foreground="#6C7086"/>
+                            </StackPanel>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
+                            <!-- Group 3: Deteksi Kesehatan & Waktu Pindai -->
+                            <TextBlock x:Name="SecDetectionHeader" Text="⏱️ Deteksi Kesehatan &amp; Waktu Pindai" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -528,7 +555,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock x:Name="LblDelaySeconds" Text="Confirmation Delay (detik):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBlock x:Name="LblDelaySeconds" Text="Delay Konfirmasi Kematian (detik):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
                                     <TextBox x:Name="TxtDelaySeconds" Text="1.5"/>
                                     <TextBlock x:Name="HintDelaySeconds" Text="Waktu tunggu sebelum alert dikirim (default 1.5s)" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
                                 </StackPanel>
@@ -563,31 +590,13 @@
                                         <TextBox x:Name="TxtHpX" Grid.Column="0" Text="115"/>
                                         <TextBox x:Name="TxtHpY" Grid.Column="2" Text="42"/>
                                     </Grid>
-                                    <TextBlock x:Name="HintHpCoords" Text="Bisa otomatis diisi via tombol 'Kalibrasi HP'" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock x:Name="LblGameName" Text="Nama Game (Display Name):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
-                                    <TextBox x:Name="TxtGameName" Text="Grand Fantasia"/>
-                                    <TextBlock x:Name="HintGameName" Text="Nama game untuk judul aplikasi &amp; notifikasi" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="HintHpCoords" Text="Bisa otomatis diisi via tombol 'Kalibrasi HP' di toolbar atas" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
                                 </StackPanel>
                             </Grid>
-
-                            <Grid Margin="0,0,0,16">
-                                <StackPanel>
-                                    <TextBlock x:Name="LblTargetTitle" Text="Target Judul Window Game:" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
-                                    <TextBox x:Name="TxtTargetTitle" Text="Grand Fantasia Origin"/>
-                                    <TextBlock x:Name="HintTargetTitle" Text="Kata kunci judul jendela game yang dicari" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <StackPanel Margin="0,0,0,16">
-                                <CheckBox x:Name="ChkShowHudBackground" Content="Tampilkan cuplikan info karakter sebagai background kartu slot" IsChecked="False" Margin="0,0,0,4"/>
-                                <TextBlock x:Name="HintShowHudBackground" Text="Menampilkan gambar live HUD karakter (avatar &amp; bar HP) di latar belakang kartu saat aktif" FontSize="10" Foreground="#6C7086"/>
-                            </StackPanel>
 
                             <Separator Background="#313244" Margin="0,0,0,16"/>
 
-                            <!-- Group Auto Assist Target (Auto TAB) -->
+                            <!-- Group 4: Auto Assist Target (Auto TAB) -->
                             <TextBlock x:Name="SecAutoTabHeader" Text="🎯 Auto Assist Target (Auto TAB)" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
                             <CheckBox x:Name="ChkAutoTabEnabled" Content="Aktifkan Fitur Auto Assist Target (Tekan TAB Otomatis)" IsChecked="True" Margin="0,0,0,4"/>
                             <TextBlock x:Name="HintAutoTab" Text="Membantu menargetkan monster saat bot idle/kehilangan target" FontSize="10" Foreground="#6C7086" Margin="0,0,0,12"/>
@@ -645,6 +654,15 @@
 
                                 <Button x:Name="BtnCalibrateTarget" Grid.Column="2" VerticalAlignment="Center" Content="🎯 Kalibrasi Target" Style="{StaticResource ModernButton}" Click="BtnCalibrateTarget_Click" Margin="0,14,0,0"/>
                             </Grid>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
+                            <!-- Group 5: Mode Diagnostik & Debug -->
+                            <TextBlock x:Name="SecDiagnosticsHeader" Text="🛠️ Mode Diagnostik &amp; Debug" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <StackPanel Margin="0,0,0,16">
+                                <CheckBox x:Name="ChkEnableDebugLog" Content="Aktifkan Mode Debug Log (Tampilkan detail teknis pixel target &amp; input)" IsChecked="False" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="HintEnableDebugLog" Text="Jika aktif, koordinat &amp; warna HEX sampling target akan dimunculkan ke log tiap beberapa detik" FontSize="10" Foreground="#6C7086"/>
+                            </StackPanel>
 
                             <Separator Background="#313244" Margin="0,0,0,16"/>
 
