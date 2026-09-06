@@ -1,0 +1,552 @@
+﻿<Window x:Class="GameBotMonitor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Grand Fantasia Bot Health Monitor"
+        Icon="app_icon.ico"
+        Height="780" Width="1080"
+        MinHeight="700" MinWidth="950"
+        WindowStartupLocation="CenterScreen"
+        Background="#181825"
+        Foreground="#CDD6F4"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <!-- Style Button Modern -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#313244"/>
+            <Setter Property="Foreground" Value="#CDD6F4"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#45475A"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="6" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#45475A"/>
+                    <Setter Property="BorderBrush" Value="#585B70"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#89B4FA"/>
+            <Setter Property="Foreground" Value="#11111B"/>
+            <Setter Property="BorderBrush" Value="#B4BEFE"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#B4BEFE"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#F38BA8"/>
+            <Setter Property="Foreground" Value="#11111B"/>
+            <Setter Property="BorderBrush" Value="#EBA0AC"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#EBA0AC"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StopAlarmButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#FAB387"/>
+            <Setter Property="Foreground" Value="#11111B"/>
+            <Setter Property="BorderBrush" Value="#F9E2AF"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F9E2AF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style Card -->
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="#1E1E2E"/>
+            <Setter Property="BorderBrush" Value="#313244"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+
+        <!-- Style TextBox -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#313244"/>
+            <Setter Property="Foreground" Value="#CDD6F4"/>
+            <Setter Property="BorderBrush" Value="#45475A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CaretBrush" Value="#CDD6F4"/>
+        </Style>
+
+        <!-- Style CheckBox -->
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#CDD6F4"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Header & Toolbar -->
+            <RowDefinition Height="Auto"/> <!-- Cards Slot Multi-Client -->
+            <RowDefinition Height="*"/>    <!-- TabControl Logs & Settings -->
+        </Grid.RowDefinitions>
+
+        <!-- 1. Header Bar -->
+        <Border Grid.Row="0" Style="{StaticResource CardBorder}" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TxtAppTitle" Text="Grand Fantasia Bot Health Monitor" FontSize="20" FontWeight="Bold" Foreground="#89B4FA"/>
+                    <TextBlock x:Name="TxtAppSubtitle" Text="Pemantau Otomatis Darah Karakter &amp; Notifikasi Multi-Client (.NET 8)" FontSize="12" Foreground="#A6ADC8" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Toolbar Buttons -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BtnToggleMonitoring" Content="&#x25B6; Mulai Pantau" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0" Click="BtnToggleMonitoring_Click"/>
+                    <Button x:Name="BtnAutoTile" Content="&#x25A6; Rapikan Jendela" Style="{StaticResource ModernButton}" Margin="0,0,8,0" Click="BtnAutoTile_Click"/>
+                    <Button x:Name="BtnCalibrate" Content="&#x2316; Kalibrasi HP" Style="{StaticResource ModernButton}" Margin="0,0,8,0" Click="BtnCalibrate_Click"/>
+                    <Button x:Name="BtnStopAlarm" Content="&#x25A0; Stop Alarm" Style="{StaticResource StopAlarmButton}" Click="BtnStopAlarm_Click" Visibility="Collapsed"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 2. Cards Slot Multi-Client (Slot 1, Slot 2, Slot 3) -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Card Slot 1 -->
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="0" ClipToBounds="True">
+                <Grid>
+                    <!-- Background HUD Image Layer -->
+                    <Image x:Name="ImgCardBg1" Stretch="UniformToFill" Opacity="0.85" Visibility="Collapsed"/>
+                    <!-- Dark Gradient Overlay for optimal readability -->
+                    <Border x:Name="OverlayCardBg1" Visibility="Collapsed">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#70181825" Offset="0.0"/>
+                                <GradientStop Color="#8811111B" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    
+                    <!-- Card Content Layer -->
+                    <StackPanel Margin="16">
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock x:Name="TxtSlot1Title" Text="SLOT 1 (Kiri)" FontWeight="Bold" FontSize="15" Foreground="#CBA6F7"/>
+                                <TextBlock x:Name="TxtPid1" Text="PID: -" FontSize="11" Foreground="#6C7086"/>
+                            </StackPanel>
+                            <Button x:Name="BtnToggleSlot1" Grid.Column="1" Content="&#x25CF; ON" Width="66" Height="28"
+                                    Tag="1" Click="BtnToggleSlot_Click"
+                                    Background="#2E7D32" Foreground="White" FontWeight="Bold" FontSize="12"
+                                    BorderThickness="0" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="14" Padding="6,4">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                        <TextBlock x:Name="TxtTitle1" Text="Menunggu Client..." FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,10" TextTrimming="CharacterEllipsis"/>
+
+                        <!-- Status Badge -->
+                        <Border x:Name="BadgeBorder1" Background="#424242" CornerRadius="6" Padding="10,6" Margin="0,0,0,10">
+                            <TextBlock x:Name="BadgeText1" Text="&#x25CB; OFFLINE" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFFFFF"/>
+                        </Border>
+
+                        <!-- Health Color Indicator -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="ColorSwatch1" Grid.Column="0" Width="24" Height="24" Background="#333333" CornerRadius="4" BorderBrush="#585B70" BorderThickness="1" Margin="0,0,8,0"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtHpSample1" Text="Sample Warna Bar HP:" FontSize="10" Foreground="#6C7086"/>
+                                <TextBlock x:Name="TxtHex1" Text="#000000" FontSize="12" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock x:Name="TxtInfo1" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Card Slot 2 -->
+            <Border Grid.Column="2" Style="{StaticResource CardBorder}" Padding="0" ClipToBounds="True">
+                <Grid>
+                    <!-- Background HUD Image Layer -->
+                    <Image x:Name="ImgCardBg2" Stretch="UniformToFill" Opacity="0.85" Visibility="Collapsed"/>
+                    <!-- Dark Gradient Overlay for optimal readability -->
+                    <Border x:Name="OverlayCardBg2" Visibility="Collapsed">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#70181825" Offset="0.0"/>
+                                <GradientStop Color="#8811111B" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <!-- Card Content Layer -->
+                    <StackPanel Margin="16">
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock x:Name="TxtSlot2Title" Text="SLOT 2 (Tengah)" FontWeight="Bold" FontSize="15" Foreground="#CBA6F7"/>
+                                <TextBlock x:Name="TxtPid2" Text="PID: -" FontSize="11" Foreground="#6C7086"/>
+                            </StackPanel>
+                            <Button x:Name="BtnToggleSlot2" Grid.Column="1" Content="&#x25CF; ON" Width="66" Height="28"
+                                    Tag="2" Click="BtnToggleSlot_Click"
+                                    Background="#2E7D32" Foreground="White" FontWeight="Bold" FontSize="12"
+                                    BorderThickness="0" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="14" Padding="6,4">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                        <TextBlock x:Name="TxtTitle2" Text="Menunggu Client..." FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,10" TextTrimming="CharacterEllipsis"/>
+
+                        <!-- Status Badge -->
+                        <Border x:Name="BadgeBorder2" Background="#424242" CornerRadius="6" Padding="10,6" Margin="0,0,0,10">
+                            <TextBlock x:Name="BadgeText2" Text="&#x25CB; OFFLINE" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFFFFF"/>
+                        </Border>
+
+                        <!-- Health Color Indicator -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="ColorSwatch2" Grid.Column="0" Width="24" Height="24" Background="#333333" CornerRadius="4" BorderBrush="#585B70" BorderThickness="1" Margin="0,0,8,0"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtHpSample2" Text="Sample Warna Bar HP:" FontSize="10" Foreground="#6C7086"/>
+                                <TextBlock x:Name="TxtHex2" Text="#000000" FontSize="12" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock x:Name="TxtInfo2" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Card Slot 3 -->
+            <Border Grid.Column="4" Style="{StaticResource CardBorder}" Padding="0" ClipToBounds="True">
+                <Grid>
+                    <!-- Background HUD Image Layer -->
+                    <Image x:Name="ImgCardBg3" Stretch="UniformToFill" Opacity="0.85" Visibility="Collapsed"/>
+                    <!-- Dark Gradient Overlay for optimal readability -->
+                    <Border x:Name="OverlayCardBg3" Visibility="Collapsed">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#70181825" Offset="0.0"/>
+                                <GradientStop Color="#8811111B" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <!-- Card Content Layer -->
+                    <StackPanel Margin="16">
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock x:Name="TxtSlot3Title" Text="SLOT 3 (Kanan)" FontWeight="Bold" FontSize="15" Foreground="#CBA6F7"/>
+                                <TextBlock x:Name="TxtPid3" Text="PID: -" FontSize="11" Foreground="#6C7086"/>
+                            </StackPanel>
+                            <Button x:Name="BtnToggleSlot3" Grid.Column="1" Content="&#x25CF; ON" Width="66" Height="28"
+                                    Tag="3" Click="BtnToggleSlot_Click"
+                                    Background="#2E7D32" Foreground="White" FontWeight="Bold" FontSize="12"
+                                    BorderThickness="0" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="14" Padding="6,4">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                        <TextBlock x:Name="TxtTitle3" Text="Menunggu Client..." FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,10" TextTrimming="CharacterEllipsis"/>
+
+                        <!-- Status Badge -->
+                        <Border x:Name="BadgeBorder3" Background="#424242" CornerRadius="6" Padding="10,6" Margin="0,0,0,10">
+                            <TextBlock x:Name="BadgeText3" Text="&#x25CB; OFFLINE" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFFFFF"/>
+                        </Border>
+
+                        <!-- Health Color Indicator -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="ColorSwatch3" Grid.Column="0" Width="24" Height="24" Background="#333333" CornerRadius="4" BorderBrush="#585B70" BorderThickness="1" Margin="0,0,8,0"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtHpSample3" Text="Sample Warna Bar HP:" FontSize="10" Foreground="#6C7086"/>
+                                <TextBlock x:Name="TxtHex3" Text="#000000" FontSize="12" FontWeight="SemiBold" Foreground="#CDD6F4"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock x:Name="TxtInfo3" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- 3. TabControl (Logs & Settings) -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0">
+            <TabControl Background="Transparent" BorderThickness="0">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Border Name="Border" Padding="16,10" Background="#181825" BorderBrush="#313244" BorderThickness="0,0,1,1" CornerRadius="8,8,0,0" Margin="2,0">
+                                        <ContentPresenter ContentSource="Header" TextElement.FontWeight="SemiBold" TextElement.FontSize="13"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="#1E1E2E"/>
+                                            <Setter TargetName="Border" Property="BorderThickness" Value="0,2,0,0"/>
+                                            <Setter TargetName="Border" Property="BorderBrush" Value="#89B4FA"/>
+                                            <Setter Property="Foreground" Value="#89B4FA"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="False">
+                                            <Setter Property="Foreground" Value="#6C7086"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
+
+                <!-- Tab 1: Log Aktivitas -->
+                <TabItem x:Name="TabLogsItem" Header="Log Aktivitas">
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBox x:Name="TxtLogs" Grid.Row="0" IsReadOnly="True" VerticalScrollBarVisibility="Auto" 
+                                  FontFamily="Consolas" FontSize="12" Background="#11111B" BorderBrush="#313244"
+                                  TextWrapping="Wrap" Margin="0,0,0,10"/>
+                        <Button x:Name="BtnClearLogs" Grid.Row="1" Content="Hapus Log" Width="100" HorizontalAlignment="Right" Style="{StaticResource ModernButton}" Click="BtnClearLogs_Click"/>
+                    </Grid>
+                </TabItem>
+
+                <!-- Tab 2: Pengaturan -->
+                <TabItem x:Name="TabSettingsItem" Header="Pengaturan &amp; Notifikasi">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                        <StackPanel>
+                            <!-- Group Bahasa / Language -->
+                            <TextBlock x:Name="SecLanguageHeader" Text="ðŸŒ Bahasa / Language" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="220"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LblLanguage" Text="Pilih Bahasa Aplikasi:" VerticalAlignment="Center" FontSize="12" Foreground="#BAC2DE"/>
+                                <ComboBox x:Name="CmbLanguage" Grid.Column="2" SelectedIndex="0" SelectionChanged="CmbLanguage_SelectionChanged" 
+                                          Background="#181825" Foreground="#11111B" BorderBrush="#313244" Padding="8,4">
+                                    <ComboBoxItem Content="🇮🇩 Bahasa Indonesia (ID)" Tag="id"/>
+                                    <ComboBoxItem Content="🇬🇧 English (EN)" Tag="en"/>
+                                </ComboBox>
+                            </Grid>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
+                            <!-- Group Deteksi & Delay -->
+                            <TextBlock x:Name="SecDetectionHeader" Text="Pengaturan Deteksi &amp; Delay" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="LblDelaySeconds" Text="Confirmation Delay (detik):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtDelaySeconds" Text="1.5"/>
+                                    <TextBlock x:Name="HintDelaySeconds" Text="Waktu tunggu sebelum alert dikirim (default 1.5s)" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock x:Name="LblScanInterval" Text="Interval Pindai Layar (ms):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtScanInterval" Text="1500"/>
+                                    <TextBlock x:Name="HintScanInterval" Text="Rekomendasi: 1000 - 2000 ms (default 1500)" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock x:Name="LblCooldownMinutes" Text="Cooldown Notifikasi Ulang (menit):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtCooldownMinutes" Text="3"/>
+                                    <TextBlock x:Name="HintCooldownMinutes" Text="Jeda anti-spam setelah alert dikirim" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="LblHpCoords" Text="Koordinat Relatif HP Bar (X, Y):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="TxtHpX" Grid.Column="0" Text="115"/>
+                                        <TextBox x:Name="TxtHpY" Grid.Column="2" Text="42"/>
+                                    </Grid>
+                                    <TextBlock x:Name="HintHpCoords" Text="Bisa otomatis diisi via tombol 'Kalibrasi HP'" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock x:Name="LblGameName" Text="Nama Game (Display Name):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtGameName" Text="Grand Fantasia"/>
+                                    <TextBlock x:Name="HintGameName" Text="Nama game untuk judul aplikasi &amp; notifikasi" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock x:Name="LblTargetTitle" Text="Target Judul Window Game:" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtTargetTitle" Text="Grand Fantasia Origin"/>
+                                    <TextBlock x:Name="HintTargetTitle" Text="Kata kunci judul jendela game yang dicari" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Margin="0,0,0,16">
+                                <CheckBox x:Name="ChkShowHudBackground" Content="Tampilkan cuplikan info karakter sebagai background kartu slot" IsChecked="False" Margin="0,0,0,4"/>
+                                <TextBlock x:Name="HintShowHudBackground" Text="Menampilkan gambar live HUD karakter (avatar &amp; bar HP) di latar belakang kartu saat aktif" FontSize="10" Foreground="#6C7086"/>
+                            </StackPanel>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
+                            <!-- Group Discord -->
+                            <TextBlock x:Name="SecDiscordHeader" Text="Discord Webhook" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <CheckBox x:Name="ChkDiscordEnabled" Content="Aktifkan Notifikasi Discord" IsChecked="True" Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtDiscordWebhook" Grid.Column="0" Text="" />
+                                <Button x:Name="BtnTestDiscord" Grid.Column="2" Content="Test Discord" Style="{StaticResource ModernButton}" Click="BtnTestDiscord_Click"/>
+                            </Grid>
+                            <CheckBox x:Name="ChkDiscordMention" Content="Mention @everyone (Bunyikan HP)" IsChecked="True" Margin="0,0,0,16"/>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
+                            <!-- Group Telegram -->
+                            <TextBlock x:Name="SecTelegramHeader" Text="Telegram Bot" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <CheckBox x:Name="ChkTelegramEnabled" Content="Aktifkan Notifikasi Telegram" IsChecked="False" Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="LblTelegramToken" Text="Telegram Bot Token:" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtTelegramToken"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock x:Name="LblTelegramChatId" Text="Chat ID Penerima:" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtTelegramChatId"/>
+                                </StackPanel>
+                                <Button x:Name="BtnTestTelegram" Grid.Column="4" VerticalAlignment="Bottom" Content="Test Telegram" Style="{StaticResource ModernButton}" Click="BtnTestTelegram_Click"/>
+                            </Grid>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
+                            <!-- Group Alarm Suara PC -->
+                            <TextBlock x:Name="SecSoundHeader" Text="Alarm Suara Lokal PC" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <CheckBox x:Name="ChkSoundEnabled" Content="Aktifkan Alarm Suara di Speaker Komputer" IsChecked="True" Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtAudioPath" Grid.Column="0" Text="" />
+                                <Button x:Name="BtnBrowseSound" Grid.Column="2" Content="Pilih File .wav" Style="{StaticResource ModernButton}" Click="BtnBrowseSound_Click"/>
+                                <Button x:Name="BtnTestSound" Grid.Column="4" Content="Test Suara" Style="{StaticResource ModernButton}" Click="BtnTestSound_Click"/>
+                            </Grid>
+                            <TextBlock x:Name="HintSound" Text="*Kosongkan untuk memakai suara sirine peringatan bawaan otomatis." FontSize="10" Foreground="#6C7086" Margin="0,-12,0,16"/>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
+                            <!-- Group Storage Info -->
+                            <Border Background="#11111B" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock x:Name="SecStorageHeader" Text="Tangkapan Layar &amp; Pembersihan (Auto-Cleanup):" FontWeight="SemiBold" FontSize="12" Foreground="#F9E2AF"/>
+                                    <CheckBox x:Name="ChkCropHudOnly" Content="Cukup kirim potongan bar darah / HUD karakter saja (Ukuran: 300x140 px)" IsChecked="True" Margin="0,8,0,6"/>
+                                    <TextBlock x:Name="TxtStorageInfo1" Text="â€¢ Tangkapan layar otomatis disimpan ke: Capture/yyyy/MM/dd/" FontSize="11" Foreground="#A6ADC8" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="TxtStorageInfo2" Text="â€¢ Otomatis menyimpan hanya 3 hari terakhir (folder lebih lama langsung dibersihkan)" FontSize="11" Foreground="#A6ADC8"/>
+                                    <TextBlock x:Name="TxtStorageInfo3" Text="â€¢ Di setiap folder harian, maksimal tersimpan 10 tangkapan layar terakhir" FontSize="11" Foreground="#A6ADC8"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Button x:Name="BtnSaveSettings" Content="Simpan Semua Pengaturan" Height="38" Style="{StaticResource PrimaryButton}" Click="BtnSaveSettings_Click"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Border>
+    </Grid>
+</Window>
+
