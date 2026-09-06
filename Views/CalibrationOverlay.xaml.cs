@@ -14,12 +14,12 @@ public partial class CalibrationOverlay : Window
     private readonly string _targetKeyword;
     private readonly string _gameName;
 
-    public CalibrationOverlay(string targetKeyword = "Grand Fantasia", string gameName = "Grand Fantasia")
+    public CalibrationOverlay(string targetKeyword = "Grand Fantasia", string gameName = "Grand Fantasia", string? customInstruction = null)
     {
         InitializeComponent();
         _targetKeyword = targetKeyword;
         _gameName = string.IsNullOrWhiteSpace(gameName) ? targetKeyword : gameName;
-        TxtInstruction.Text = $"Arahkan kursor dan KLIK 1 KALI tepat di bar darah jendela game {_gameName}.";
+        TxtInstruction.Text = customInstruction ?? $"Arahkan kursor dan KLIK 1 KALI tepat di bar darah jendela game {_gameName}.";
     }
 
     private void Window_MouseDown(object sender, MouseButtonEventArgs e)

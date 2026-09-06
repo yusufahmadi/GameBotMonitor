@@ -1,4 +1,4 @@
-﻿<Window x:Class="GameBotMonitor.MainWindow"
+<Window x:Class="GameBotMonitor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Grand Fantasia Bot Health Monitor"
@@ -202,7 +202,44 @@
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock x:Name="TxtInfo1" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="TxtInfo1" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                        <!-- Auto TAB Assist Per-Slot Toggle & Test -->
+                        <Border Background="#252538" CornerRadius="6" Padding="8,4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LblAutoTabSlot1" Text="🎯 Auto TAB:" FontSize="11" Foreground="#BAC2DE" VerticalAlignment="Center"/>
+                                <Button x:Name="BtnAutoTabSlot1" Grid.Column="1" Content="○ OFF" Width="52" Height="22"
+                                        Tag="1" Click="BtnToggleAutoTabSlot_Click"
+                                        Background="#45475A" Foreground="#CDD6F4" FontWeight="SemiBold" FontSize="10"
+                                        BorderThickness="0" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="11" Padding="4,2">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button x:Name="BtnTestTabSlot1" Grid.Column="3" Content="⚡ Test" Width="48" Height="22"
+                                        Tag="1" Click="BtnTestTabSlot_Click"
+                                        Background="#313244" Foreground="#89B4FA" FontWeight="SemiBold" FontSize="10"
+                                        BorderThickness="0" Cursor="Hand" ToolTip="Kirim 1x tombol TAB ke jendela game Slot 1">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="11" Padding="4,2">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -266,7 +303,44 @@
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock x:Name="TxtInfo2" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="TxtInfo2" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                        <!-- Auto TAB Assist Per-Slot Toggle & Test -->
+                        <Border Background="#252538" CornerRadius="6" Padding="8,4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LblAutoTabSlot2" Text="🎯 Auto TAB:" FontSize="11" Foreground="#BAC2DE" VerticalAlignment="Center"/>
+                                <Button x:Name="BtnAutoTabSlot2" Grid.Column="1" Content="○ OFF" Width="52" Height="22"
+                                        Tag="2" Click="BtnToggleAutoTabSlot_Click"
+                                        Background="#45475A" Foreground="#CDD6F4" FontWeight="SemiBold" FontSize="10"
+                                        BorderThickness="0" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="11" Padding="4,2">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button x:Name="BtnTestTabSlot2" Grid.Column="3" Content="⚡ Test" Width="48" Height="22"
+                                        Tag="2" Click="BtnTestTabSlot_Click"
+                                        Background="#313244" Foreground="#89B4FA" FontWeight="SemiBold" FontSize="10"
+                                        BorderThickness="0" Cursor="Hand" ToolTip="Kirim 1x tombol TAB ke jendela game Slot 2">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="11" Padding="4,2">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -330,7 +404,44 @@
                             </StackPanel>
                         </Grid>
 
-                        <TextBlock x:Name="TxtInfo3" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="TxtInfo3" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                        <!-- Auto TAB Assist Per-Slot Toggle & Test -->
+                        <Border Background="#252538" CornerRadius="6" Padding="8,4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LblAutoTabSlot3" Text="🎯 Auto TAB:" FontSize="11" Foreground="#BAC2DE" VerticalAlignment="Center"/>
+                                <Button x:Name="BtnAutoTabSlot3" Grid.Column="1" Content="○ OFF" Width="52" Height="22"
+                                        Tag="3" Click="BtnToggleAutoTabSlot_Click"
+                                        Background="#45475A" Foreground="#CDD6F4" FontWeight="SemiBold" FontSize="10"
+                                        BorderThickness="0" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="11" Padding="4,2">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button x:Name="BtnTestTabSlot3" Grid.Column="3" Content="⚡ Test" Width="48" Height="22"
+                                        Tag="3" Click="BtnTestTabSlot_Click"
+                                        Background="#313244" Foreground="#89B4FA" FontWeight="SemiBold" FontSize="10"
+                                        BorderThickness="0" Cursor="Hand" ToolTip="Kirim 1x tombol TAB ke jendela game Slot 3">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="11" Padding="4,2">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -380,8 +491,13 @@
 
                 <!-- Tab 2: Pengaturan -->
                 <TabItem x:Name="TabSettingsItem" Header="Pengaturan &amp; Notifikasi">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
-                        <StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="16">
+                            <StackPanel>
                             <!-- Group Bahasa / Language -->
                             <TextBlock x:Name="SecLanguageHeader" Text="ðŸŒ Bahasa / Language" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
                             <Grid Margin="0,0,0,16">
@@ -471,6 +587,67 @@
 
                             <Separator Background="#313244" Margin="0,0,0,16"/>
 
+                            <!-- Group Auto Assist Target (Auto TAB) -->
+                            <TextBlock x:Name="SecAutoTabHeader" Text="🎯 Auto Assist Target (Auto TAB)" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <CheckBox x:Name="ChkAutoTabEnabled" Content="Aktifkan Fitur Auto Assist Target (Tekan TAB Otomatis)" IsChecked="True" Margin="0,0,0,4"/>
+                            <TextBlock x:Name="HintAutoTab" Text="Membantu menargetkan monster saat bot idle/kehilangan target" FontSize="10" Foreground="#6C7086" Margin="0,0,0,12"/>
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="LblAutoTabMode" Text="Metode Pengiriman Input:" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <ComboBox x:Name="CmbAutoTabMode" SelectedIndex="0" Background="#181825" Foreground="#11111B" BorderBrush="#313244" Padding="6,4">
+                                        <ComboBoxItem Content="Background (PostMessage)" Tag="Background"/>
+                                        <ComboBoxItem Content="Foreground (SendInput)" Tag="Foreground"/>
+                                    </ComboBox>
+                                    <TextBlock x:Name="HintAutoTabMode" Text="Background tidak mencuri fokus mouse/layar" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock x:Name="LblAutoTabIdle" Text="Waktu Tanpa Target (Detik):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtAutoTabIdle" Text="3.0"/>
+                                    <TextBlock x:Name="HintAutoTabIdle" Text="Lama tanpa monster sebelum kirim TAB" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock x:Name="LblAutoTabInterval" Text="Interval Pengiriman TAB (Detik):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <TextBox x:Name="TxtAutoTabInterval" Text="1.5"/>
+                                    <TextBlock x:Name="HintAutoTabInterval" Text="Jeda antar TAB jika belum dapat target" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="LblAutoTabCoords" Text="Koordinat Target Monster (X, Y):" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="TxtAutoTabTargetX" Grid.Column="0" Text="470"/>
+                                        <TextBox x:Name="TxtAutoTabTargetY" Grid.Column="2" Text="35"/>
+                                    </Grid>
+                                    <TextBlock x:Name="HintAutoTabCoords" Text="Titik sampling HUD target monster (tengah atas)" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <Button x:Name="BtnCalibrateTarget" Grid.Column="2" VerticalAlignment="Center" Content="🎯 Kalibrasi Target" Style="{StaticResource ModernButton}" Click="BtnCalibrateTarget_Click" Margin="0,14,0,0"/>
+                            </Grid>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
                             <!-- Group Discord -->
                             <TextBlock x:Name="SecDiscordHeader" Text="Discord Webhook" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
                             <CheckBox x:Name="ChkDiscordEnabled" Content="Aktifkan Notifikasi Discord" IsChecked="True" Margin="0,0,0,8"/>
@@ -535,18 +712,22 @@
                                 <StackPanel>
                                     <TextBlock x:Name="SecStorageHeader" Text="Tangkapan Layar &amp; Pembersihan (Auto-Cleanup):" FontWeight="SemiBold" FontSize="12" Foreground="#F9E2AF"/>
                                     <CheckBox x:Name="ChkCropHudOnly" Content="Cukup kirim potongan bar darah / HUD karakter saja (Ukuran: 300x140 px)" IsChecked="True" Margin="0,8,0,6"/>
-                                    <TextBlock x:Name="TxtStorageInfo1" Text="â€¢ Tangkapan layar otomatis disimpan ke: Capture/yyyy/MM/dd/" FontSize="11" Foreground="#A6ADC8" Margin="0,2,0,0"/>
-                                    <TextBlock x:Name="TxtStorageInfo2" Text="â€¢ Otomatis menyimpan hanya 3 hari terakhir (folder lebih lama langsung dibersihkan)" FontSize="11" Foreground="#A6ADC8"/>
-                                    <TextBlock x:Name="TxtStorageInfo3" Text="â€¢ Di setiap folder harian, maksimal tersimpan 10 tangkapan layar terakhir" FontSize="11" Foreground="#A6ADC8"/>
+                                    <TextBlock x:Name="TxtStorageInfo1" Text="• Tangkapan layar otomatis disimpan ke: Capture/yyyy/MM/dd/" FontSize="11" Foreground="#A6ADC8" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="TxtStorageInfo2" Text="• Otomatis menyimpan hanya 3 hari terakhir (folder lebih lama langsung dibersihkan)" FontSize="11" Foreground="#A6ADC8"/>
+                                    <TextBlock x:Name="TxtStorageInfo3" Text="• Di setiap folder harian, maksimal tersimpan 10 tangkapan layar terakhir" FontSize="11" Foreground="#A6ADC8"/>
                                 </StackPanel>
                             </Border>
-
-                            <Button x:Name="BtnSaveSettings" Content="Simpan Semua Pengaturan" Height="38" Style="{StaticResource PrimaryButton}" Click="BtnSaveSettings_Click"/>
                         </StackPanel>
                     </ScrollViewer>
-                </TabItem>
-            </TabControl>
-        </Border>
-    </Grid>
+
+                    <!-- Docked Bottom Save Button -->
+                    <Border Grid.Row="1" Background="#181825" BorderBrush="#313244" BorderThickness="0,1,0,0" Padding="16,12">
+                        <Button x:Name="BtnSaveSettings" Content="💾 Simpan Semua Pengaturan" Height="40" FontSize="14" FontWeight="Bold" Style="{StaticResource PrimaryButton}" Click="BtnSaveSettings_Click"/>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Border>
+</Grid>
 </Window>
 

@@ -219,6 +219,26 @@ public partial class MainWindow : Window
         ChkShowHudBackground.Content = LanguageService.Get("ChkShowHudBackground");
         HintShowHudBackground.Text = LanguageService.Get("HintShowHudBackground");
 
+        // Settings - Auto TAB
+        SecAutoTabHeader.Text = "🎯 " + LanguageService.Get("SecAutoTab");
+        ChkAutoTabEnabled.Content = LanguageService.Get("ChkAutoTab");
+        HintAutoTab.Text = LanguageService.Get("HintAutoTab");
+        LblAutoTabMode.Text = LanguageService.Get("LblAutoTabMode");
+        HintAutoTabMode.Text = LanguageService.Get("HintAutoTabMode");
+        LblAutoTabIdle.Text = LanguageService.Get("LblAutoTabIdle");
+        HintAutoTabIdle.Text = LanguageService.Get("HintAutoTabIdle");
+        LblAutoTabInterval.Text = LanguageService.Get("LblAutoTabInterval");
+        HintAutoTabInterval.Text = LanguageService.Get("HintAutoTabInterval");
+        LblAutoTabCoords.Text = LanguageService.Get("LblAutoTabCoords");
+        HintAutoTabCoords.Text = LanguageService.Get("HintAutoTabCoords");
+        BtnCalibrateTarget.Content = "🎯 " + LanguageService.Get("BtnCalibrateTarget");
+        LblAutoTabSlot1.Text = "🎯 " + LanguageService.Get("AutoTabToggleLabel") + ":";
+        LblAutoTabSlot2.Text = "🎯 " + LanguageService.Get("AutoTabToggleLabel") + ":";
+        LblAutoTabSlot3.Text = "🎯 " + LanguageService.Get("AutoTabToggleLabel") + ":";
+        BtnTestTabSlot1.Content = "⚡ " + LanguageService.Get("BtnTestTab");
+        BtnTestTabSlot2.Content = "⚡ " + LanguageService.Get("BtnTestTab");
+        BtnTestTabSlot3.Content = "⚡ " + LanguageService.Get("BtnTestTab");
+
         // Settings - Discord
         SecDiscordHeader.Text = LanguageService.Get("SecDiscord");
         ChkDiscordEnabled.Content = LanguageService.Get("ChkDiscord");
@@ -283,6 +303,129 @@ public partial class MainWindow : Window
         }
     }
 
+    // ===================== AUTO TAB TOGGLE PER SLOT =====================
+
+    private void BtnToggleAutoTabSlot_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not WpfButton btn) return;
+        if (!int.TryParse(btn.Tag?.ToString(), out int slotNum)) return;
+
+        var slot = _slots[slotNum - 1];
+        slot.IsAutoTabEnabled = !slot.IsAutoTabEnabled;
+
+        if (slot.IsAutoTabEnabled)
+        {
+            btn.Content = "● ON";
+            btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#1E88E5"));
+            btn.Foreground = System.Windows.Media.Brushes.White;
+            slot.NoTargetSince = null;
+            slot.LastTabSentTime = null;
+            AddLog($"[INFO] Slot {slotNum}: Auto TAB diaktifkan (ON).");
+        }
+        else
+        {
+            btn.Content = "○ OFF";
+            btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#45475A"));
+            btn.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#CDD6F4"));
+            slot.NoTargetSince = null;
+            slot.LastTabSentTime = null;
+            AddLog($"[INFO] Slot {slotNum}: Auto TAB dinonaktifkan (OFF).");
+        }
+    }
+
+    public static void SendTabKey(nint hWnd, string mode)
+    {
+        try
+        {
+            if (hWnd == 0) return;
+
+            if (mode == "Foreground")
+            {
+                // Mode B: Bawa jendela ke depan lalu kirim SendInput dengan SCAN CODE
+                // DirectInput games memerlukan hardware scan code (0x0F = TAB), bukan virtual key
+                Native.Win32.SetForegroundWindow(hWnd);
+                System.Threading.Thread.Sleep(100);
+
+                int structSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Native.Win32.INPUT));
+
+                // 1. KeyDown TAB — gunakan scan code 0x0F dan flag KEYEVENTF_SCANCODE
+                var inputDown = new Native.Win32.INPUT[1];
+                inputDown[0] = new Native.Win32.INPUT
+                {
+                    type = Native.Win32.INPUT_KEYBOARD,
+                    u = new Native.Win32.InputUnion
+                    {
+                        ki = new Native.Win32.KEYBDINPUT
+                        {
+                            wVk = 0,                                       // 0 = pakai scan code
+                            wScan = 0x0F,                                  // Hardware scan code untuk TAB
+                            dwFlags = Native.Win32.KEYEVENTF_SCANCODE,    // Mode scan code
+                            time = 0,
+                            dwExtraInfo = IntPtr.Zero
+                        }
+                    }
+                };
+                //Native.Win32.SendInput(1, inputDown, structSize);
+                uint resultDown = Native.Win32.SendInput(1, inputDown, structSize);
+                if (resultDown == 0)
+                {
+                    int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                    System.Diagnostics.Debug.WriteLine($"SendInput gagal dengan kode error: {error}");
+                }
+
+
+                // Tahan tombol selama 50ms agar terdeteksi oleh render/game loop
+                // Update 150
+                System.Threading.Thread.Sleep(150);
+
+                // 2. KeyUp TAB
+                var inputUp = new Native.Win32.INPUT[1];
+                inputUp[0] = new Native.Win32.INPUT
+                {
+                    type = Native.Win32.INPUT_KEYBOARD,
+                    u = new Native.Win32.InputUnion
+                    {
+                        ki = new Native.Win32.KEYBDINPUT
+                        {
+                            wVk = 0,
+                            wScan = 0x0F,
+                            dwFlags = Native.Win32.KEYEVENTF_SCANCODE | Native.Win32.KEYEVENTF_KEYUP,
+                            time = 0,
+                            dwExtraInfo = IntPtr.Zero
+                        }
+                    }
+                };
+                //Native.Win32.SendInput(1, inputUp, structSize);
+                uint resultUp = Native.Win32.SendInput(1, inputUp, structSize);
+                if (resultUp == 0)
+                {
+                    int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                    System.Diagnostics.Debug.WriteLine($"SendInput gagal dengan kode error: {error}");
+                }
+            }
+            else
+            {
+                // Mode A (Background): Kirim WM_CHAR + WM_KEYDOWN/WM_KEYUP ke message queue jendela game
+                // WM_CHAR sebagai prioritas (beberapa game merespons WM_CHAR lebih dahulu)
+                nint wParam = (nint)Native.Win32.VK_TAB;
+                nint lParamDown = (nint)0x000F0001; // Scan code 0x0F, repeat 1
+                nint lParamUp   = unchecked((nint)0xC00F0001); // Bit 30+31 = KeyUp
+
+                // Kirim WM_KEYDOWN + WM_KEYUP (standard)
+                Native.Win32.PostMessage(hWnd, Native.Win32.WM_KEYDOWN, wParam, lParamDown);
+                System.Threading.Thread.Sleep(20);
+                Native.Win32.PostMessage(hWnd, Native.Win32.WM_KEYUP, wParam, lParamUp);
+                System.Threading.Thread.Sleep(15);
+                // Kirim WM_CHAR sebagai fallback (engine seperti Grand Fantasia kadang hanya merespons WM_CHAR)
+                Native.Win32.PostMessage(hWnd, Native.Win32.WM_CHAR, wParam, lParamDown);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SendTabKey] Error: {ex.Message}");
+        }
+    }
+
     private void LoadConfigToUi()
     {
         // Language
@@ -296,6 +439,14 @@ public partial class MainWindow : Window
         TxtGameName.Text = _config.GameName;
         TxtTargetTitle.Text = _config.TargetWindowTitle;
         ChkShowHudBackground.IsChecked = _config.ShowHudBackground;
+
+        // Auto TAB
+        ChkAutoTabEnabled.IsChecked = _config.AutoTab.Enabled;
+        CmbAutoTabMode.SelectedIndex = (_config.AutoTab.SendMode == "Foreground") ? 1 : 0;
+        TxtAutoTabIdle.Text = _config.AutoTab.IdleSeconds.ToString("0.0");
+        TxtAutoTabInterval.Text = _config.AutoTab.IntervalSeconds.ToString("0.0");
+        TxtAutoTabTargetX.Text = _config.AutoTab.TargetOffsetX.ToString();
+        TxtAutoTabTargetY.Text = _config.AutoTab.TargetOffsetY.ToString();
 
         ChkDiscordEnabled.IsChecked = _config.Discord.Enabled;
         TxtDiscordWebhook.Text = _config.Discord.WebhookUrl;
@@ -472,6 +623,47 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnCalibrateTarget_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle, 
+            _config.GameName, 
+            LanguageService.Get("MsgCalibrateTargetPrompt"));
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.AutoTab.TargetOffsetX = overlay.ResultOffsetX;
+            _config.AutoTab.TargetOffsetY = overlay.ResultOffsetY;
+            TxtAutoTabTargetX.Text = _config.AutoTab.TargetOffsetX.ToString();
+            TxtAutoTabTargetY.Text = _config.AutoTab.TargetOffsetY.ToString();
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Target Monster disimpan: Offset X = {_config.AutoTab.TargetOffsetX}, Offset Y = {_config.AutoTab.TargetOffsetY}");
+        }
+    }
+
+    private void BtnTestTabSlot_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not WpfButton btn) return;
+        if (!int.TryParse(btn.Tag?.ToString(), out int slotNum)) return;
+
+        var slot = _slots[slotNum - 1];
+        if (slot.WindowHandle == 0 || slot.Status == ClientStatus.Offline)
+        {
+            WpfMessageBox.Show(
+                $"Slot {slotNum} belum mendeteksi jendela game / client offline.",
+                LanguageService.Get("TitleWarn"),
+                WpfMessageBoxButton.OK,
+                WpfMessageBoxImage.Warning);
+            return;
+        }
+
+        string mode = (CmbAutoTabMode.SelectedIndex == 1) ? "Foreground" : "Background";
+        SendTabKey(slot.WindowHandle, mode);
+        AddLog($"[TEST] Mengirim tombol TAB ke Slot {slotNum} ('{slot.WindowTitle}', PID: {slot.ProcessId}) menggunakan Mode {mode}.");
+    }
+
     private void BtnStopAlarm_Click(object sender, RoutedEventArgs e)
     {
         _soundService.Stop();
@@ -580,6 +772,14 @@ public partial class MainWindow : Window
             _config.TargetWindowTitle = TxtTargetTitle.Text.Trim();
             _config.ShowHudBackground = ChkShowHudBackground.IsChecked ?? false;
 
+            // Auto TAB
+            _config.AutoTab.Enabled = ChkAutoTabEnabled.IsChecked ?? false;
+            _config.AutoTab.SendMode = (CmbAutoTabMode.SelectedIndex == 1) ? "Foreground" : "Background";
+            _config.AutoTab.IdleSeconds = double.TryParse(TxtAutoTabIdle.Text, out var idle) ? Math.Max(0.5, idle) : 3.0;
+            _config.AutoTab.IntervalSeconds = double.TryParse(TxtAutoTabInterval.Text, out var intervalTab) ? Math.Max(0.5, intervalTab) : 1.5;
+            _config.AutoTab.TargetOffsetX = int.TryParse(TxtAutoTabTargetX.Text, out var targetX) ? targetX : 470;
+            _config.AutoTab.TargetOffsetY = int.TryParse(TxtAutoTabTargetY.Text, out var targetY) ? targetY : 35;
+
             _config.Discord.Enabled = ChkDiscordEnabled.IsChecked ?? false;
             _config.Discord.WebhookUrl = TxtDiscordWebhook.Text.Trim();
             _config.Discord.MentionEveryone = ChkDiscordMention.IsChecked ?? false;
@@ -658,6 +858,54 @@ public partial class MainWindow : Window
                         // Reset cooldown alert agar jika karakter mati lagi di kemudian saat, notifikasi langsung terpicu seketika
                         slot.LastAlertSentTime = null;
                         AddLog($"[INFO] Karakter Slot {slot.SlotIndex} ({slot.WindowTitle}) HIDUP / ALIVE ({hex}).");
+                    }
+
+                    // --- Auto Assist Target (Auto TAB) ---
+                    if (_config.AutoTab.Enabled && slot.IsEnabled && slot.IsAutoTabEnabled)
+                    {
+                        var (targetColor, targetHex) = PixelHealthScanner.SampleTargetColor(win.Handle, _config.AutoTab.TargetOffsetX, _config.AutoTab.TargetOffsetY);
+                        bool hasMonsterTarget = PixelHealthScanner.IsTargetMonsterPresent(targetColor, _config.AutoTab.TargetColorHex);
+                        slot.HasTarget = hasMonsterTarget;
+
+                        // Debug: log warna setiap 5 detik agar bisa dikalibrasi
+                        bool shouldLogColor = slot.NoTargetSince == null
+                            ? true
+                            : (DateTime.Now - slot.NoTargetSince.Value).TotalSeconds % 5 < (_config.ScanIntervalMs / 1000.0 + 0.5);
+                        if (slot.LastTabSentTime == null || (DateTime.Now - slot.LastTabSentTime.Value).TotalSeconds >= 5)
+                        {
+                            AddLog($"[DEBUG] Slot {slot.SlotIndex}: Target pixel @({_config.AutoTab.TargetOffsetX},{_config.AutoTab.TargetOffsetY}) = {targetHex} | HasTarget={hasMonsterTarget}");
+                        }
+
+                        if (hasMonsterTarget)
+                        {
+                            slot.NoTargetSince = null;
+                        }
+                        else
+                        {
+                            if (slot.NoTargetSince == null)
+                            {
+                                slot.NoTargetSince = DateTime.Now;
+                            }
+                            else
+                            {
+                                var noTargetElapsed = (DateTime.Now - slot.NoTargetSince.Value).TotalSeconds;
+                                bool intervalPassed = slot.LastTabSentTime == null ||
+                                    (DateTime.Now - slot.LastTabSentTime.Value).TotalSeconds >= _config.AutoTab.IntervalSeconds;
+
+                                if (noTargetElapsed >= _config.AutoTab.IdleSeconds && intervalPassed)
+                                {
+                                    slot.LastTabSentTime = DateTime.Now;
+                                    SendTabKey(slot.WindowHandle, _config.AutoTab.SendMode);
+                                    string logMsg = LanguageService.Format("LogAutoTabSent", noTargetElapsed, _config.AutoTab.SendMode);
+                                    AddLog($"[ASSIST] Slot {slot.SlotIndex}: {logMsg}");
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        slot.NoTargetSince = null;
+                        slot.LastTabSentTime = null;
                     }
                 }
                 else

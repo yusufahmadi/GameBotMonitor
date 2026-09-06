@@ -48,9 +48,19 @@ Jika karakter mati (darah 0) atau klien game mengalami crash/freeze, aplikasi ak
    - **Cooldown Notifikasi**: Menghindari spam alert beruntun.
    - **Auto-Cleanup**: Screenshot disimpan rapi per tanggal (`Capture/yyyy/MM/dd/`), dibatasi maksimal 10 gambar per hari, dan otomatis menghapus folder lebih dari 3 hari.
 
-9. **📌 Dukungan Penuh System Tray Windows**
-   - Icon aplikasi dan icon system tray seragam menggunakan desain **Notification Bell**.
-   - Menutup jendela (tombol `X`) otomatis meminimalkan aplikasi ke System Tray di pojok kanan bawah agar pemantauan tetap berjalan di latar belakang.
+9. **🎯 Auto Assist Target (Auto TAB Otomatis)**
+   - Mendeteksi ketiadaan target monster di area tengah atas layar via pixel sampling.
+   - Jika dalam waktu X detik bot tidak memiliki target monster (idle/stuck), aplikasi otomatis mengirimkan assist penekanan tombol **`TAB`** untuk mengunci monster terdekat.
+   - **Tombol On/Off Mandiri di Setiap Kartu Slot**: Anda dapat mengaktifkan Auto TAB untuk Slot 1 & 2 (penyerang) dan mematikannya untuk Slot 3 (support/healer).
+   - **2 Mode Pengiriman Input**:
+     - *Mode Background (`PostMessage`)*: Mengirim tombol langsung ke antrean jendela game tanpa mencuri fokus mouse atau mengganggu aktivitas Anda di PC.
+     - *Mode Foreground (`SendInput`)*: Simulasi hardware event yang identik dengan keyboard fisik.
+   - Tombol **"Kalibrasi Target"** untuk mencocokkan koordinat frame monster secara instan, serta tombol **"Test TAB Sekarang"**.
+
+10. **📌 Dukungan Penuh System Tray Windows & UI Fleksibel**
+    - Icon aplikasi dan icon system tray seragam menggunakan desain **Notification Bell**.
+    - Tombol **"Simpan Semua Pengaturan"** dibuat *docked* di bagian bawah tab agar selalu terlihat dan langsung bisa diklik tanpa perlu scrolling.
+    - Menutup jendela (tombol `X`) otomatis meminimalkan aplikasi ke System Tray di pojok kanan bawah agar pemantauan tetap berjalan di latar belakang.
 
 ---
 

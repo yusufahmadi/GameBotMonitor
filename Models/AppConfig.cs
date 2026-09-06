@@ -16,6 +16,18 @@ public class AppConfig
     public TelegramConfig Telegram { get; set; } = new();
     public SoundConfig SoundAlert { get; set; } = new();
     public StorageConfig Storage { get; set; } = new();
+    public AutoTabConfig AutoTab { get; set; } = new();
+}
+
+public class AutoTabConfig
+{
+    public bool Enabled { get; set; } = true;
+    public string SendMode { get; set; } = "Background"; // "Background" or "Foreground"
+    public double IdleSeconds { get; set; } = 3.0;
+    public double IntervalSeconds { get; set; } = 1.5;
+    public int TargetOffsetX { get; set; } = 470; // Perkiraan tengah atas (frame target monster)
+    public int TargetOffsetY { get; set; } = 35;
+    public string TargetColorHex { get; set; } = ""; // Referensi warna saat ada monster (opsional)
 }
 
 public class DiscordConfig

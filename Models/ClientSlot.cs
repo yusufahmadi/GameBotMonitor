@@ -57,6 +57,17 @@ public class ClientSlot : INotifyPropertyChanged
     public DateTime? DeadSince { get; set; }
     public DateTime? LastAlertSentTime { get; set; }
 
+    // Auto Assist Target (Auto TAB) State
+    private bool _isAutoTabEnabled = false;
+    public bool IsAutoTabEnabled
+    {
+        get => _isAutoTabEnabled;
+        set { _isAutoTabEnabled = value; OnPropertyChanged(); }
+    }
+    public DateTime? NoTargetSince { get; set; }
+    public DateTime? LastTabSentTime { get; set; }
+    public bool HasTarget { get; set; } = false;
+
     public string StatusBadgeText => Status switch
     {
         ClientStatus.Alive => LanguageService.Get("BadgeAlive"),

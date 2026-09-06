@@ -99,4 +99,74 @@ public static class Win32
     public const uint SRCCOPY = 0x00CC0020;
     public const uint PW_RENDERFULLCONTENT = 0x00000002;
     public const uint PW_CLIENTONLY = 0x00000001;
+
+    // Keyboard & Input Interop
+    public const uint WM_KEYDOWN = 0x0100;
+    public const uint WM_KEYUP = 0x0101;
+    public const int VK_TAB = 0x09;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool PostMessage(nint hWnd, uint msg, nint wParam, nint lParam);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetForegroundWindow(nint hWnd);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct INPUT
+    {
+        public uint type;
+        public InputUnion u;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct InputUnion
+    {
+        [FieldOffset(0)]
+        public KEYBDINPUT ki;
+
+        [FieldOffset(0)]
+        public MOUSEINPUT mi;
+
+        [FieldOffset(0)]
+        public HARDWAREINPUT hi;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KEYBDINPUT
+    {
+        public ushort wVk;
+        public ushort wScan;
+        public uint dwFlags;
+        public uint time;
+        public nint dwExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MOUSEINPUT
+    {
+        public int dx;
+        public int dy;
+        public uint mouseData;
+        public uint dwFlags;
+        public uint time;
+        public nint dwExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct HARDWAREINPUT
+    {
+        public uint uMsg;
+        public ushort wParamL;
+        public ushort wParamH;
+    }
+
+    public const uint INPUT_KEYBOARD = 1;
+    public const uint KEYEVENTF_KEYUP = 0x0002;
+    public const uint KEYEVENTF_SCANCODE = 0x0008;
+    public const uint WM_CHAR = 0x0102;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern uint SendInput(uint nInputs, [MarshalAs(UnmanagedType.LPArray), In] INPUT[] pInputs, int cbSize);
 }

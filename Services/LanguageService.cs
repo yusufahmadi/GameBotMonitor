@@ -63,6 +63,25 @@ public static class LanguageService
             ["ChkShowHudBackground"] = "Tampilkan cuplikan info karakter sebagai background kartu slot",
             ["HintShowHudBackground"] = "Menampilkan gambar live HUD karakter (avatar & bar HP) di latar belakang kartu saat aktif",
 
+            // Settings - Auto TAB Assist
+            ["SecAutoTab"] = "Auto Assist Target (Auto TAB)",
+            ["ChkAutoTab"] = "Aktifkan Fitur Auto Assist Target (Tekan TAB Otomatis)",
+            ["HintAutoTab"] = "Membantu menargetkan monster saat bot idle/kehilangan target",
+            ["LblAutoTabMode"] = "Metode Pengiriman Input:",
+            ["HintAutoTabMode"] = "Background (PostMessage) tidak mencuri fokus; Foreground (SendInput) simulasi hardware",
+            ["LblAutoTabIdle"] = "Waktu Tanpa Target (Detik):",
+            ["HintAutoTabIdle"] = "Jeda waktu tanpa monster sebelum tombol TAB dikirim",
+            ["LblAutoTabInterval"] = "Interval Pengiriman TAB (Detik):",
+            ["HintAutoTabInterval"] = "Jeda antar penekanan TAB jika masih belum mendapat target",
+            ["LblAutoTabCoords"] = "Koordinat Target Monster (X, Y):",
+            ["HintAutoTabCoords"] = "Titik sampling HUD target monster (tengah atas)",
+            ["BtnCalibrateTarget"] = "Kalibrasi Target",
+            ["BtnTestTab"] = "Test TAB Sekarang",
+            ["AutoTabToggleLabel"] = "Auto TAB",
+            ["LogAutoTabSent"] = "Tidak ada target monster selama {0:F1}s -> Mengirim tombol TAB ({1})",
+            ["TitleCalibrateTarget"] = "Kalibrasi Titik Target Monster",
+            ["MsgCalibrateTargetPrompt"] = "Klik pada bar/frame target monster di jendela game.",
+
             // Settings - Discord
             ["SecDiscord"] = "Discord Webhook",
             ["ChkDiscord"] = "Aktifkan Notifikasi Discord",
@@ -186,6 +205,25 @@ public static class LanguageService
             ["HintTargetTitle"] = "Keyword for target game window title",
             ["ChkShowHudBackground"] = "Show character info snapshot as slot card background",
             ["HintShowHudBackground"] = "Displays live character HUD (avatar & HP bar) as the card background when active",
+
+            // Settings - Auto TAB Assist
+            ["SecAutoTab"] = "Auto Assist Target (Auto TAB)",
+            ["ChkAutoTab"] = "Enable Auto Assist Target (Auto TAB Keypress)",
+            ["HintAutoTab"] = "Assists in acquiring monsters when bot is idle/loses target",
+            ["LblAutoTabMode"] = "Input Delivery Method:",
+            ["HintAutoTabMode"] = "Background (PostMessage) doesn't steal focus; Foreground (SendInput) hardware simulation",
+            ["LblAutoTabIdle"] = "No-Target Threshold (Seconds):",
+            ["HintAutoTabIdle"] = "Idle duration without monster before sending TAB key",
+            ["LblAutoTabInterval"] = "TAB Repeat Interval (Seconds):",
+            ["HintAutoTabInterval"] = "Delay between TAB keypresses if still no target",
+            ["LblAutoTabCoords"] = "Target Monster Coordinates (X, Y):",
+            ["HintAutoTabCoords"] = "Sampling coordinate for target monster HUD (top-center)",
+            ["BtnCalibrateTarget"] = "Calibrate Target",
+            ["BtnTestTab"] = "Test TAB Now",
+            ["AutoTabToggleLabel"] = "Auto TAB",
+            ["LogAutoTabSent"] = "No monster target for {0:F1}s -> Sending TAB key ({1})",
+            ["TitleCalibrateTarget"] = "Calibrate Monster Target Point",
+            ["MsgCalibrateTargetPrompt"] = "Click on the monster target bar/frame in the game window.",
 
             // Settings - Discord
             ["SecDiscord"] = "Discord Webhook",

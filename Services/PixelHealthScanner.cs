@@ -80,4 +80,48 @@ public static class PixelHealthScanner
             return null;
         }
     }
+
+    /// <summary>
+    /// Mengambil warna pixel pada koordinat relatif target frame monster
+    /// </summary>
+    public static (Color color, string hex) SampleTargetColor(nint hWnd, int offsetX, int offsetY)
+    {
+        return SampleHpColor(hWnd, offsetX, offsetY);
+    }
+
+    /// <summary>
+    /// Mengevaluasi apakah target monster sedang ter-lock (ada HUD target)
+    /// Jika referenceHex disediakan, periksa kecocokan warna dengan toleransi.
+    /// Jika referenceHex kosong, gunakan heuristik: HUD target monster Grand Fantasia
+    /// memiliki border krem/emas (R>140, G>130, B>100) atau bar HP merah muda (R>140, G<120)
+    /// </summary>
+    public static bool IsTargetMonsterPresent(Color color, string? referenceHex = null)
+    {
+        if (!string.IsNullOrWhiteSpace(referenceHex) && referenceHex.StartsWith('#') && referenceHex.Length == 7)
+        {
+            try
+            {
+                int r = Convert.ToInt32(referenceHex.Substring(1, 2), 16);
+                int g = Convert.ToInt32(referenceHex.Substring(3, 2), 16);
+                int b = Convert.ToInt32(referenceHex.Substring(5, 2), 16);
+
+                // Toleransi perbedaan warna (RGB distance <= 50)
+                int diff = Math.Abs(color.R - r) + Math.Abs(color.G - g) + Math.Abs(color.B - b);
+                return diff <= 55;
+            }
+            catch
+            {
+                // Fallback jika hex salah format
+            }
+        }
+
+        // Heuristik Grand Fantasia:
+        // Saat ada monster, bar HP monster berwarna merah/pink (R tinggi, R - G >= 20)
+        // ATAU bingkai ornamen frame monster berwarna krem/gading (R>150, G>140, B>120)
+        // Saat TIDAK ada monster, area tersebut adalah background alam game yang gelap/hijau rumput/langit
+        bool isHpBar = color.R > 130 && (color.R - color.G >= 20);
+        bool isFrameBorder = (color.R > 150 && color.G > 140 && color.B > 115) && (Math.Abs(color.R - color.G) < 30);
+
+        return isHpBar || isFrameBorder;
+    }
 }
