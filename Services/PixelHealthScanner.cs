@@ -55,24 +55,41 @@ public static class PixelHealthScanner
     }
 
     /// <summary>
-    /// Menangkap gambar jendela game. Secara default hanya menangkap potongan HUD status karakter (avatar & bar HP)
+    /// Menangkap gambar jendela game. Secara default hanya menangkap potongan HUD status karakter (avatar & bar HP) dari dalam game (Client Area, tanpa title bar & border).
     /// </summary>
-    public static Bitmap? CaptureWindow(nint hWnd, bool cropHudOnly = true, int cropWidth = 300, int cropHeight = 140)
+    public static Bitmap? CaptureWindow(nint hWnd, bool cropHudOnly = true, int cropWidth = 225, int cropHeight = 92)
     {
         try
         {
-            if (!Win32.GetWindowRect(hWnd, out var rect)) return null;
-
-            int width = cropHudOnly ? Math.Min(cropWidth, rect.Width) : Math.Max(100, rect.Width);
-            int height = cropHudOnly ? Math.Min(cropHeight, rect.Height) : Math.Max(100, rect.Height);
-
-            var bmp = new Bitmap(width, height);
-            using (var g = Graphics.FromImage(bmp))
+            // Ambil Client Area (area render dalam game, membuang title bar dan border jendela OS)
+            var pt = new Win32.POINT { X = 0, Y = 0 };
+            if (Win32.ClientToScreen(hWnd, ref pt) && Win32.GetClientRect(hWnd, out var clientRect) && clientRect.Width > 0 && clientRect.Height > 0)
             {
-                g.CopyFromScreen(rect.Left, rect.Top, 0, 0, new Size(width, height));
+                int width = cropHudOnly ? Math.Min(cropWidth, clientRect.Width) : Math.Max(100, clientRect.Width);
+                int height = cropHudOnly ? Math.Min(cropHeight, clientRect.Height) : Math.Max(100, clientRect.Height);
+
+                var bmp = new Bitmap(width, height);
+                using (var g = Graphics.FromImage(bmp))
+                {
+                    g.CopyFromScreen(pt.X, pt.Y, 0, 0, new Size(width, height));
+                }
+
+                return bmp;
             }
 
-            return bmp;
+            // Fallback ke GetWindowRect jika ClientToScreen / GetClientRect tidak tersedia
+            if (!Win32.GetWindowRect(hWnd, out var rect)) return null;
+
+            int fallbackWidth = cropHudOnly ? Math.Min(cropWidth, rect.Width) : Math.Max(100, rect.Width);
+            int fallbackHeight = cropHudOnly ? Math.Min(cropHeight, rect.Height) : Math.Max(100, rect.Height);
+
+            var fallbackBmp = new Bitmap(fallbackWidth, fallbackHeight);
+            using (var g = Graphics.FromImage(fallbackBmp))
+            {
+                g.CopyFromScreen(rect.Left, rect.Top, 0, 0, new Size(fallbackWidth, fallbackHeight));
+            }
+
+            return fallbackBmp;
         }
         catch (Exception ex)
         {

@@ -53,7 +53,7 @@ public static class TelegramNotifier
         return await SendMessageAsync(botToken, chatId, text);
     }
 
-    private static async Task<bool> SendMessageAsync(string botToken, string chatId, string text)
+    public static async Task<bool> SendMessageAsync(string botToken, string chatId, string text)
     {
         try
         {
@@ -73,6 +73,41 @@ public static class TelegramNotifier
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[TelegramNotifier] SendMessage error: {ex.Message}");
+            return false;
+        }
+    }
+
+    public static async Task<bool> SendPhotoDirectAsync(string botToken, string chatId, string imagePath, string caption)
+    {
+        if (string.IsNullOrWhiteSpace(botToken) || string.IsNullOrWhiteSpace(chatId)) return false;
+
+        try
+        {
+            if (!File.Exists(imagePath))
+            {
+                return await SendMessageAsync(botToken, chatId, caption);
+            }
+
+            var url = $"https://api.telegram.org/bot{botToken}/sendPhoto";
+            using var content = new MultipartFormDataContent();
+            content.Add(new StringContent(chatId), "chat_id");
+            if (!string.IsNullOrWhiteSpace(caption))
+            {
+                content.Add(new StringContent(caption), "caption");
+                content.Add(new StringContent("Markdown"), "parse_mode");
+            }
+
+            var imageBytes = await File.ReadAllBytesAsync(imagePath);
+            var fileContent = new ByteArrayContent(imageBytes);
+            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png");
+            content.Add(fileContent, "photo", "image.png");
+
+            var response = await HttpClient.PostAsync(url, content);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TelegramNotifier] SendPhotoDirect error: {ex.Message}");
             return false;
         }
     }

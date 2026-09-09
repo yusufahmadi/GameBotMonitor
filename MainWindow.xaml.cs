@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _scanTimer;
     private readonly SoundAlertService _soundService = new();
     private StorageCleanupService _storageService;
+    private readonly TelegramBotListener _telegramListener = new();
     private readonly List<ClientSlot> _slots = new();
     private bool _isMonitoring = false;
 
@@ -23,6 +24,21 @@ public partial class MainWindow : Window
     private System.Windows.Forms.ToolStripMenuItem _trayItemOpen = null!;
     private System.Windows.Forms.ToolStripMenuItem _trayItemExit = null!;
     private bool _closeFromTray = false;
+
+    // Card Slot Text Brushes (Menyala saat Show Character Background ON)
+    private static readonly System.Windows.Media.SolidColorBrush BrushPidDefault = CreateFrozenBrush(0x6C, 0x70, 0x86);
+    private static readonly System.Windows.Media.SolidColorBrush BrushPidBright = CreateFrozenBrush(0x89, 0xDC, 0xEB);     // Menyala: Vivid Cyan (#89DCEB)
+    private static readonly System.Windows.Media.SolidColorBrush BrushTitleDefault = CreateFrozenBrush(0xBA, 0xC2, 0xDE);
+    private static readonly System.Windows.Media.SolidColorBrush BrushTitleBright = CreateFrozenBrush(0xFF, 0xFF, 0xFF);   // Menyala: Pure White (#FFFFFF)
+    private static readonly System.Windows.Media.SolidColorBrush BrushHpSampleDefault = CreateFrozenBrush(0x6C, 0x70, 0x86);
+    private static readonly System.Windows.Media.SolidColorBrush BrushHpSampleBright = CreateFrozenBrush(0xF9, 0xE2, 0xAF); // Menyala: Warm Gold / Yellow (#F9E2AF)
+
+    private static System.Windows.Media.SolidColorBrush CreateFrozenBrush(byte r, byte g, byte b)
+    {
+        var brush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(r, g, b));
+        brush.Freeze();
+        return brush;
+    }
 
     public MainWindow()
     {
@@ -54,6 +70,9 @@ public partial class MainWindow : Window
         LoadConfigToUi();
         ApplyLanguage();
         UpdateSlotUi();
+
+        // Inisialisasi Telegram Remote Control (2-Way)
+        InitTelegramListener();
 
         AddLog("Aplikasi siap / Application ready.");
     }
@@ -256,6 +275,8 @@ public partial class MainWindow : Window
         // Settings - Telegram
         SecTelegramHeader.Text = LanguageService.Get("SecTelegram");
         ChkTelegramEnabled.Content = LanguageService.Get("ChkTelegram");
+        ChkTelegramInteractive.Content = LanguageService.Get("ChkTelegramInteractive");
+        HintTelegramInteractive.Text = LanguageService.Get("HintTelegramInteractive");
         LblTelegramToken.Text = LanguageService.Get("LblTelegramToken");
         LblTelegramChatId.Text = LanguageService.Get("LblTelegramChatId");
         BtnTestTelegram.Content = LanguageService.Get("BtnTestTelegram");
@@ -286,58 +307,147 @@ public partial class MainWindow : Window
 
     // ===================== SLOT ON/OFF TOGGLE =====================
 
+    public bool SetSlotMonitoring(int slotNum, bool enable)
+    {
+        if (slotNum < 1 || slotNum > 3) return false;
+        var slot = _slots[slotNum - 1];
+        slot.IsEnabled = enable;
+
+        WpfButton? btn = slotNum switch
+        {
+            1 => BtnToggleSlot1,
+            2 => BtnToggleSlot2,
+            3 => BtnToggleSlot3,
+            _ => null
+        };
+
+        if (btn != null)
+        {
+            if (enable)
+            {
+                btn.Content = "\u25CF ON";
+                btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#2E7D32"));
+                slot.LastAlertSentTime = null;
+                slot.DeadSince = null;
+            }
+            else
+            {
+                btn.Content = "\u25CB OFF";
+                btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#6C7086"));
+            }
+        }
+
+        string logMsg = enable ? LanguageService.Get("SlotEnabledLog") : LanguageService.Get("SlotDisabledLog");
+        AddLog($"[INFO] Slot {slotNum} {logMsg}");
+        return true;
+    }
+
     private void BtnToggleSlot_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not WpfButton btn) return;
         if (!int.TryParse(btn.Tag?.ToString(), out int slotNum)) return;
-
         var slot = _slots[slotNum - 1];
-        slot.IsEnabled = !slot.IsEnabled;
-
-        if (slot.IsEnabled)
-        {
-            btn.Content = "\u25CF ON";
-            btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#2E7D32"));
-            // Reset cooldown agar bisa kirim notifikasi langsung saat diaktifkan
-            slot.LastAlertSentTime = null;
-            slot.DeadSince = null;
-            AddLog($"[INFO] Slot {slotNum} {LanguageService.Get("SlotEnabledLog")}");
-        }
-        else
-        {
-            btn.Content = "\u25CB OFF";
-            btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#6C7086"));
-            AddLog($"[INFO] Slot {slotNum} {LanguageService.Get("SlotDisabledLog")}");
-        }
+        SetSlotMonitoring(slotNum, !slot.IsEnabled);
     }
 
     // ===================== AUTO TAB TOGGLE PER SLOT =====================
+
+    public bool SetAutoTabSlot(int slotNum, bool enable)
+    {
+        if (slotNum < 1 || slotNum > 3) return false;
+        var slot = _slots[slotNum - 1];
+        slot.IsAutoTabEnabled = enable;
+        slot.NoTargetSince = null;
+        slot.LastTabSentTime = null;
+
+        WpfButton? btn = slotNum switch
+        {
+            1 => BtnAutoTabSlot1,
+            2 => BtnAutoTabSlot2,
+            3 => BtnAutoTabSlot3,
+            _ => null
+        };
+
+        if (btn != null)
+        {
+            if (enable)
+            {
+                btn.Content = "● ON";
+                btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#1E88E5"));
+                btn.Foreground = System.Windows.Media.Brushes.White;
+            }
+            else
+            {
+                btn.Content = "○ OFF";
+                btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#45475A"));
+                btn.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#CDD6F4"));
+            }
+        }
+
+        string statusStr = enable ? "diaktifkan (ON)" : "dinonaktifkan (OFF)";
+        AddLog($"[INFO] Slot {slotNum}: Auto TAB {statusStr}.");
+        return true;
+    }
 
     private void BtnToggleAutoTabSlot_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not WpfButton btn) return;
         if (!int.TryParse(btn.Tag?.ToString(), out int slotNum)) return;
-
         var slot = _slots[slotNum - 1];
-        slot.IsAutoTabEnabled = !slot.IsAutoTabEnabled;
+        SetAutoTabSlot(slotNum, !slot.IsAutoTabEnabled);
+    }
 
-        if (slot.IsAutoTabEnabled)
+    public static void SendHardwareKey(nint hWnd, ushort scanCode, int holdMs = 150)
+    {
+        try
         {
-            btn.Content = "● ON";
-            btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#1E88E5"));
-            btn.Foreground = System.Windows.Media.Brushes.White;
-            slot.NoTargetSince = null;
-            slot.LastTabSentTime = null;
-            AddLog($"[INFO] Slot {slotNum}: Auto TAB diaktifkan (ON).");
+            if (hWnd == 0) return;
+            Native.Win32.SetForegroundWindow(hWnd);
+            System.Threading.Thread.Sleep(80);
+
+            int structSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Native.Win32.INPUT));
+
+            var inputDown = new Native.Win32.INPUT[1];
+            inputDown[0] = new Native.Win32.INPUT
+            {
+                type = Native.Win32.INPUT_KEYBOARD,
+                u = new Native.Win32.InputUnion
+                {
+                    ki = new Native.Win32.KEYBDINPUT
+                    {
+                        wVk = 0,
+                        wScan = scanCode,
+                        dwFlags = Native.Win32.KEYEVENTF_SCANCODE,
+                        time = 0,
+                        dwExtraInfo = IntPtr.Zero
+                    }
+                }
+            };
+            Native.Win32.SendInput(1, inputDown, structSize);
+
+            System.Threading.Thread.Sleep(holdMs);
+
+            var inputUp = new Native.Win32.INPUT[1];
+            inputUp[0] = new Native.Win32.INPUT
+            {
+                type = Native.Win32.INPUT_KEYBOARD,
+                u = new Native.Win32.InputUnion
+                {
+                    ki = new Native.Win32.KEYBDINPUT
+                    {
+                        wVk = 0,
+                        wScan = scanCode,
+                        dwFlags = Native.Win32.KEYEVENTF_SCANCODE | Native.Win32.KEYEVENTF_KEYUP,
+                        time = 0,
+                        dwExtraInfo = IntPtr.Zero
+                    }
+                }
+            };
+            Native.Win32.SendInput(1, inputUp, structSize);
         }
-        else
+        catch (Exception ex)
         {
-            btn.Content = "○ OFF";
-            btn.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#45475A"));
-            btn.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#CDD6F4"));
-            slot.NoTargetSince = null;
-            slot.LastTabSentTime = null;
-            AddLog($"[INFO] Slot {slotNum}: Auto TAB dinonaktifkan (OFF).");
+            System.Diagnostics.Debug.WriteLine($"[SendHardwareKey] Error: {ex.Message}");
         }
     }
 
@@ -349,88 +459,20 @@ public partial class MainWindow : Window
 
             if (mode == "Foreground")
             {
-                // Mode B: Bawa jendela ke depan lalu kirim SendInput dengan SCAN CODE
-                // DirectInput games memerlukan hardware scan code (0x0F = TAB), bukan virtual key
-                Native.Win32.SetForegroundWindow(hWnd);
-                System.Threading.Thread.Sleep(100);
-
-                int structSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Native.Win32.INPUT));
-
-                // 1. KeyDown TAB — gunakan scan code 0x0F dan flag KEYEVENTF_SCANCODE
-                var inputDown = new Native.Win32.INPUT[1];
-                inputDown[0] = new Native.Win32.INPUT
-                {
-                    type = Native.Win32.INPUT_KEYBOARD,
-                    u = new Native.Win32.InputUnion
-                    {
-                        ki = new Native.Win32.KEYBDINPUT
-                        {
-                            wVk = 0,                                       // 0 = pakai scan code
-                            wScan = 0x0F,                                  // Hardware scan code untuk TAB
-                            dwFlags = Native.Win32.KEYEVENTF_SCANCODE,    // Mode scan code
-                            time = 0,
-                            dwExtraInfo = IntPtr.Zero
-                        }
-                    }
-                };
-                //Native.Win32.SendInput(1, inputDown, structSize);
-                uint resultDown = Native.Win32.SendInput(1, inputDown, structSize);
-                if (resultDown == 0)
-                {
-                    int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-                    System.Diagnostics.Debug.WriteLine($"SendInput gagal dengan kode error: {error}");
-                }
-
-
-                // Tahan tombol selama 50ms agar terdeteksi oleh render/game loop
-                // Update 150
-                System.Threading.Thread.Sleep(150);
-
-                // 2. KeyUp TAB
-                var inputUp = new Native.Win32.INPUT[1];
-                inputUp[0] = new Native.Win32.INPUT
-                {
-                    type = Native.Win32.INPUT_KEYBOARD,
-                    u = new Native.Win32.InputUnion
-                    {
-                        ki = new Native.Win32.KEYBDINPUT
-                        {
-                            wVk = 0,
-                            wScan = 0x0F,
-                            dwFlags = Native.Win32.KEYEVENTF_SCANCODE | Native.Win32.KEYEVENTF_KEYUP,
-                            time = 0,
-                            dwExtraInfo = IntPtr.Zero
-                        }
-                    }
-                };
-                //Native.Win32.SendInput(1, inputUp, structSize);
-                uint resultUp = Native.Win32.SendInput(1, inputUp, structSize);
-                if (resultUp == 0)
-                {
-                    int error = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-                    System.Diagnostics.Debug.WriteLine($"SendInput gagal dengan kode error: {error}");
-                }
+                SendHardwareKey(hWnd, 0x0F, 150);
             }
             else
             {
                 // Mode A (Background): Kirim WM_CHAR + WM_KEYDOWN/WM_KEYUP ke message queue jendela game
-                // WM_CHAR sebagai prioritas (beberapa game merespons WM_CHAR lebih dahulu)
                 nint wParam = (nint)Native.Win32.VK_TAB;
                 nint lParamDown = (nint)0x000F0001; // Scan code 0x0F, repeat 1
                 nint lParamUp = unchecked((nint)0xC00F0001); // Bit 30+31 = KeyUp
 
-                // Kirim WM_KEYDOWN + WM_KEYUP (standard)
                 Native.Win32.PostMessage(hWnd, Native.Win32.WM_KEYDOWN, wParam, lParamDown);
                 System.Threading.Thread.Sleep(20);
                 Native.Win32.PostMessage(hWnd, Native.Win32.WM_KEYUP, wParam, lParamUp);
-                System.Threading.Thread.Sleep(20);
-                // Kirim WM_CHAR sebagai fallback (engine seperti Grand Fantasia kadang hanya merespons WM_CHAR)
+                System.Threading.Thread.Sleep(15);
                 Native.Win32.PostMessage(hWnd, Native.Win32.WM_CHAR, wParam, lParamDown);
-
-                //// Kirim WM_KEYDOWN
-                //Native.Win32.PostMessage(hWnd, Native.Win32.WM_KEYDOWN, wParam, lParamDown);
-                //System.Threading.Thread.Sleep(20);
-
                 //// Kirim WM_CHAR sebagai karakter hasil dari KeyDown
                 //Native.Win32.PostMessage(hWnd, Native.Win32.WM_CHAR, wParam, lParamDown);
             }
@@ -469,6 +511,7 @@ public partial class MainWindow : Window
         ChkDiscordMention.IsChecked = _config.Discord.MentionEveryone;
 
         ChkTelegramEnabled.IsChecked = _config.Telegram.Enabled;
+        ChkTelegramInteractive.IsChecked = _config.Telegram.InteractiveEnabled;
         TxtTelegramToken.Text = _config.Telegram.BotToken;
         TxtTelegramChatId.Text = _config.Telegram.ChatId;
 
@@ -476,21 +519,41 @@ public partial class MainWindow : Window
         TxtAudioPath.Text = _config.SoundAlert.CustomAudioPath;
 
         ChkCropHudOnly.IsChecked = _config.Storage.CropHudOnly;
+
+        // Character Switch Mapping
+        TxtLogoutOffsetY.Text = _config.CharSwitch.LogoutOffsetY.ToString();
+        TxtReturnOffsetX.Text = _config.CharSwitch.ReturnOffsetX.ToString();
+        TxtReturnOffsetY.Text = _config.CharSwitch.ReturnOffsetY.ToString();
+        TxtStartGamePercentX.Text = _config.CharSwitch.StartGamePercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtStartGamePercentY.Text = _config.CharSwitch.StartGamePercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+        TxtCard1PercentX.Text = _config.CharSwitch.Card1PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtCard1PercentY.Text = _config.CharSwitch.Card1PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtCard2PercentX.Text = _config.CharSwitch.Card2PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtCard2PercentY.Text = _config.CharSwitch.Card2PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtCard3PercentX.Text = _config.CharSwitch.Card3PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtCard3PercentY.Text = _config.CharSwitch.Card3PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+        TxtPagePrevPercentX.Text = _config.CharSwitch.PagePrevPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtPagePrevPercentY.Text = _config.CharSwitch.PagePrevPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtPageNextPercentX.Text = _config.CharSwitch.PageNextPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtPageNextPercentY.Text = _config.CharSwitch.PageNextPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     private void UpdateSlotUi()
     {
         // Slot 1
-        UpdateCard(_slots[0], TxtPid1, TxtTitle1, BadgeBorder1, BadgeText1, ColorSwatch1, TxtHex1, TxtInfo1, ImgCardBg1, OverlayCardBg1);
+        UpdateCard(_slots[0], TxtPid1, TxtTitle1, TxtHpSample1, BadgeBorder1, BadgeText1, ColorSwatch1, TxtHex1, TxtInfo1, ImgCardBg1, OverlayCardBg1);
         // Slot 2
-        UpdateCard(_slots[1], TxtPid2, TxtTitle2, BadgeBorder2, BadgeText2, ColorSwatch2, TxtHex2, TxtInfo2, ImgCardBg2, OverlayCardBg2);
+        UpdateCard(_slots[1], TxtPid2, TxtTitle2, TxtHpSample2, BadgeBorder2, BadgeText2, ColorSwatch2, TxtHex2, TxtInfo2, ImgCardBg2, OverlayCardBg2);
         // Slot 3
-        UpdateCard(_slots[2], TxtPid3, TxtTitle3, BadgeBorder3, BadgeText3, ColorSwatch3, TxtHex3, TxtInfo3, ImgCardBg3, OverlayCardBg3);
+        UpdateCard(_slots[2], TxtPid3, TxtTitle3, TxtHpSample3, BadgeBorder3, BadgeText3, ColorSwatch3, TxtHex3, TxtInfo3, ImgCardBg3, OverlayCardBg3);
     }
 
     private void UpdateCard(ClientSlot slot,
         System.Windows.Controls.TextBlock txtPid,
         System.Windows.Controls.TextBlock txtTitle,
+        System.Windows.Controls.TextBlock txtHpSample,
         System.Windows.Controls.Border badgeBorder,
         System.Windows.Controls.TextBlock badgeText,
         System.Windows.Controls.Border colorSwatch,
@@ -522,7 +585,7 @@ public partial class MainWindow : Window
         {
             try
             {
-                using var bmp = PixelHealthScanner.CaptureWindow(slot.WindowHandle, true, 300, 140);
+                using var bmp = PixelHealthScanner.CaptureWindow(slot.WindowHandle, true, _config.Storage.CropWidth, _config.Storage.CropHeight);
                 if (bmp != null)
                 {
                     imgCardBg.Source = BitmapToBitmapSource(bmp);
@@ -541,6 +604,30 @@ public partial class MainWindow : Window
             imgCardBg.Source = null;
             imgCardBg.Visibility = Visibility.Collapsed;
             overlayCardBg.Visibility = Visibility.Collapsed;
+        }
+
+        // Warna teks lebih menyala & tegas saat fitur Show Character Background aktif
+        if (_config.ShowHudBackground)
+        {
+            txtPid.Foreground = BrushPidBright;
+            txtPid.FontWeight = FontWeights.SemiBold;
+
+            txtTitle.Foreground = BrushTitleBright;
+            txtTitle.FontWeight = FontWeights.SemiBold;
+
+            txtHpSample.Foreground = BrushHpSampleBright;
+            txtHpSample.FontWeight = FontWeights.SemiBold;
+        }
+        else
+        {
+            txtPid.Foreground = BrushPidDefault;
+            txtPid.FontWeight = FontWeights.Normal;
+
+            txtTitle.Foreground = BrushTitleDefault;
+            txtTitle.FontWeight = FontWeights.Normal;
+
+            txtHpSample.Foreground = BrushHpSampleDefault;
+            txtHpSample.FontWeight = FontWeights.Normal;
         }
     }
 
@@ -661,6 +748,205 @@ public partial class MainWindow : Window
 
             ConfigService.Save(_config);
             AddLog($"[INFO] Kalibrasi Target Monster disimpan: Offset X = {_config.AutoTab.TargetOffsetX}, Offset Y = {_config.AutoTab.TargetOffsetY}");
+        }
+    }
+
+    private void BtnCalibrateLogout_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Buka menu System (tekan ESC) di game, lalu KLIK 1 KALI tepat di tengah tombol LOGOUT.",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.CharSwitch.LogoutOffsetX = overlay.CenterOffsetX;
+            _config.CharSwitch.LogoutOffsetY = overlay.CenterOffsetY;
+            TxtLogoutOffsetY.Text = _config.CharSwitch.LogoutOffsetY.ToString();
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Logout disimpan: Offset Y = {_config.CharSwitch.LogoutOffsetY} px (Offset X = {_config.CharSwitch.LogoutOffsetX} px)");
+
+            WpfMessageBox.Show(
+                $"Kalibrasi Tombol Logout Berhasil!\n\n" +
+                $"Offset Y dari Center: {_config.CharSwitch.LogoutOffsetY} px\n" +
+                $"Offset X dari Center: {_config.CharSwitch.LogoutOffsetX} px\n\n" +
+                $"Pengaturan telah disimpan otomatis.",
+                "Sukses Kalibrasi Logout",
+                WpfMessageBoxButton.OK,
+                WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateReturn_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Saat dialog Quit (countdown 10s) muncul di game, KLIK 1 KALI tepat di tengah tombol RETURN.",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.CharSwitch.ReturnOffsetX = overlay.CenterOffsetX;
+            _config.CharSwitch.ReturnOffsetY = overlay.CenterOffsetY;
+            TxtReturnOffsetX.Text = _config.CharSwitch.ReturnOffsetX.ToString();
+            TxtReturnOffsetY.Text = _config.CharSwitch.ReturnOffsetY.ToString();
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Return disimpan: Offset X = {_config.CharSwitch.ReturnOffsetX} px, Offset Y = {_config.CharSwitch.ReturnOffsetY} px");
+
+            WpfMessageBox.Show(
+                $"Kalibrasi Tombol Return Berhasil!\n\n" +
+                $"Offset X dari Center: {_config.CharSwitch.ReturnOffsetX} px\n" +
+                $"Offset Y dari Center: {_config.CharSwitch.ReturnOffsetY} px\n\n" +
+                $"Pengaturan telah disimpan otomatis.",
+                "Sukses Kalibrasi Return",
+                WpfMessageBoxButton.OK,
+                WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateStartGame_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di layar Pemilihan Karakter, KLIK 1 KALI tepat di tengah tombol START GAME.",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.CharSwitch.StartGamePercentX = Math.Round(overlay.PercentX, 1);
+            _config.CharSwitch.StartGamePercentY = Math.Round(overlay.PercentY, 1);
+            TxtStartGamePercentX.Text = _config.CharSwitch.StartGamePercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtStartGamePercentY.Text = _config.CharSwitch.StartGamePercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Start Game disimpan: Posisi = {_config.CharSwitch.StartGamePercentX:F1}% X, {_config.CharSwitch.StartGamePercentY:F1}% Y");
+
+            WpfMessageBox.Show(
+                $"Kalibrasi Tombol Start Game Berhasil!\n\n" +
+                $"Posisi Horizontal: {_config.CharSwitch.StartGamePercentX:F1}%\n" +
+                $"Posisi Vertikal: {_config.CharSwitch.StartGamePercentY:F1}%\n\n" +
+                $"Pengaturan telah disimpan otomatis.",
+                "Sukses Kalibrasi Start Game",
+                WpfMessageBoxButton.OK,
+                WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateCard1_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di layar Karakter, KLIK 1 KALI tepat di tengah HUD KARTU KARAKTER 1 (Atas).",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.CharSwitch.Card1PercentX = Math.Round(overlay.PercentX, 1);
+            _config.CharSwitch.Card1PercentY = Math.Round(overlay.PercentY, 1);
+            TxtCard1PercentX.Text = _config.CharSwitch.Card1PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtCard1PercentY.Text = _config.CharSwitch.Card1PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Card 1 disimpan: {_config.CharSwitch.Card1PercentX:F1}% X, {_config.CharSwitch.Card1PercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Card 1 Berhasil!\n\nPosisi: {_config.CharSwitch.Card1PercentX:F1}% X, {_config.CharSwitch.Card1PercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Card 1", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateCard2_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di layar Karakter, KLIK 1 KALI tepat di tengah HUD KARTU KARAKTER 2 (Tengah).",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.CharSwitch.Card2PercentX = Math.Round(overlay.PercentX, 1);
+            _config.CharSwitch.Card2PercentY = Math.Round(overlay.PercentY, 1);
+            TxtCard2PercentX.Text = _config.CharSwitch.Card2PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtCard2PercentY.Text = _config.CharSwitch.Card2PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Card 2 disimpan: {_config.CharSwitch.Card2PercentX:F1}% X, {_config.CharSwitch.Card2PercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Card 2 Berhasil!\n\nPosisi: {_config.CharSwitch.Card2PercentX:F1}% X, {_config.CharSwitch.Card2PercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Card 2", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateCard3_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di layar Karakter, KLIK 1 KALI tepat di tengah HUD KARTU KARAKTER 3 (Bawah).",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.CharSwitch.Card3PercentX = Math.Round(overlay.PercentX, 1);
+            _config.CharSwitch.Card3PercentY = Math.Round(overlay.PercentY, 1);
+            TxtCard3PercentX.Text = _config.CharSwitch.Card3PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtCard3PercentY.Text = _config.CharSwitch.Card3PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Card 3 disimpan: {_config.CharSwitch.Card3PercentX:F1}% X, {_config.CharSwitch.Card3PercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Card 3 Berhasil!\n\nPosisi: {_config.CharSwitch.Card3PercentX:F1}% X, {_config.CharSwitch.Card3PercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Card 3", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibratePagePrev_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di layar Karakter, KLIK 1 KALI tepat di tombol PANAH PREV ◀.",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.CharSwitch.PagePrevPercentX = Math.Round(overlay.PercentX, 1);
+            _config.CharSwitch.PagePrevPercentY = Math.Round(overlay.PercentY, 1);
+            TxtPagePrevPercentX.Text = _config.CharSwitch.PagePrevPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtPagePrevPercentY.Text = _config.CharSwitch.PagePrevPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Panah Prev ◀ disimpan: {_config.CharSwitch.PagePrevPercentX:F1}% X, {_config.CharSwitch.PagePrevPercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Panah Prev ◀ Berhasil!\n\nPosisi: {_config.CharSwitch.PagePrevPercentX:F1}% X, {_config.CharSwitch.PagePrevPercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Panah Prev ◀", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibratePageNext_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di layar Karakter, KLIK 1 KALI tepat di tombol PANAH NEXT ▶.",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.CharSwitch.PageNextPercentX = Math.Round(overlay.PercentX, 1);
+            _config.CharSwitch.PageNextPercentY = Math.Round(overlay.PercentY, 1);
+            TxtPageNextPercentX.Text = _config.CharSwitch.PageNextPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtPageNextPercentY.Text = _config.CharSwitch.PageNextPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Panah Next ▶ disimpan: {_config.CharSwitch.PageNextPercentX:F1}% X, {_config.CharSwitch.PageNextPercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Panah Next ▶ Berhasil!\n\nPosisi: {_config.CharSwitch.PageNextPercentX:F1}% X, {_config.CharSwitch.PageNextPercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Panah Next ▶", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
         }
     }
 
@@ -807,6 +1093,7 @@ public partial class MainWindow : Window
             _config.Discord.MentionEveryone = ChkDiscordMention.IsChecked ?? false;
 
             _config.Telegram.Enabled = ChkTelegramEnabled.IsChecked ?? false;
+            _config.Telegram.InteractiveEnabled = ChkTelegramInteractive.IsChecked ?? true;
             _config.Telegram.BotToken = TxtTelegramToken.Text.Trim();
             _config.Telegram.ChatId = TxtTelegramChatId.Text.Trim();
 
@@ -815,10 +1102,34 @@ public partial class MainWindow : Window
 
             _config.Storage.CropHudOnly = ChkCropHudOnly.IsChecked ?? true;
 
+            // Character Switch Mapping
+            _config.CharSwitch.LogoutOffsetY = int.TryParse(TxtLogoutOffsetY.Text, out var lY) ? lY : 78;
+            _config.CharSwitch.ReturnOffsetX = int.TryParse(TxtReturnOffsetX.Text, out var rX) ? rX : -45;
+            _config.CharSwitch.ReturnOffsetY = int.TryParse(TxtReturnOffsetY.Text, out var rY) ? rY : 32;
+            _config.CharSwitch.StartGamePercentX = double.TryParse(TxtStartGamePercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var sgX) ? sgX : 50.0;
+            _config.CharSwitch.StartGamePercentY = double.TryParse(TxtStartGamePercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var sgY) ? sgY : 98.1;
+
+            _config.CharSwitch.Card1PercentX = double.TryParse(TxtCard1PercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var c1x) ? c1x : 85.4;
+            _config.CharSwitch.Card1PercentY = double.TryParse(TxtCard1PercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var c1y) ? c1y : 17.1;
+            _config.CharSwitch.Card2PercentX = double.TryParse(TxtCard2PercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var c2x) ? c2x : 85.4;
+            _config.CharSwitch.Card2PercentY = double.TryParse(TxtCard2PercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var c2y) ? c2y : 39.4;
+            _config.CharSwitch.Card3PercentX = double.TryParse(TxtCard3PercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var c3x) ? c3x : 85.4;
+            _config.CharSwitch.Card3PercentY = double.TryParse(TxtCard3PercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var c3y) ? c3y : 61.8;
+
+            _config.CharSwitch.PagePrevPercentX = double.TryParse(TxtPagePrevPercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var ppx) ? ppx : 73.8;
+            _config.CharSwitch.PagePrevPercentY = double.TryParse(TxtPagePrevPercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var ppy) ? ppy : 77.2;
+            _config.CharSwitch.PageNextPercentX = double.TryParse(TxtPageNextPercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var pnx) ? pnx : 84.4;
+            _config.CharSwitch.PageNextPercentY = double.TryParse(TxtPageNextPercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var pny) ? pny : 77.2;
+
             ConfigService.Save(_config);
             _scanTimer.Interval = TimeSpan.FromMilliseconds(_config.ScanIntervalMs);
             _storageService = new StorageCleanupService(_config.Storage.BaseFolder, _config.Storage.MaxDaysRetention, _config.Storage.MaxScreenshotsPerDay);
             ApplyLanguage();
+            UpdateSlotUi();
+
+            // Restart Telegram Listener dengan konfigurasi terbaru
+            _telegramListener.Stop();
+            _telegramListener.Start(_config);
 
             if (!silent)
             {
@@ -832,6 +1143,187 @@ public partial class MainWindow : Window
             {
                 WpfMessageBox.Show($"Error: {ex.Message}", LanguageService.Get("TitleError"), WpfMessageBoxButton.OK, WpfMessageBoxImage.Error);
             }
+        }
+    }
+
+    private void ChkShowHudBackground_Click(object sender, RoutedEventArgs e)
+    {
+        _config.ShowHudBackground = ChkShowHudBackground.IsChecked ?? false;
+        UpdateSlotUi();
+    }
+
+    private async void BtnRunTestCommand_Click(object sender, RoutedEventArgs e)
+    {
+        string rawText = CmbTestCommand.Text?.Trim() ?? "";
+        if (string.IsNullOrWhiteSpace(rawText))
+        {
+            AddLog("[WARN] Silakan pilih atau ketik perintah terlebih dahulu.");
+            return;
+        }
+
+        AddLog($"[TEST-RUN] Menjalankan perintah: '{rawText}'...");
+
+        string clean = rawText.Trim();
+        if (clean.StartsWith('/'))
+        {
+            clean = clean.Substring(1).Trim();
+        }
+
+        var parts = clean.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0) return;
+
+        string cmd = parts[0].ToLowerInvariant();
+
+        try
+        {
+            BtnRunTestCommand.IsEnabled = false;
+
+            // Handle char switch: char2 1, char1 2, gantichar 1 2, char1, etc.
+            if (cmd.StartsWith("char") || cmd.StartsWith("gantichar") || (cmd.StartsWith("c") && char.IsDigit(cmd.Length > 1 ? cmd[1] : 'x')))
+            {
+                int slot = 1;
+                int charNum = 1;
+
+                if (cmd == "char" || cmd == "gantichar")
+                {
+                    if (parts.Length >= 3)
+                    {
+                        int.TryParse(parts[1], out slot);
+                        int.TryParse(parts[2], out charNum);
+                    }
+                    else if (parts.Length == 2)
+                    {
+                        int.TryParse(parts[1], out charNum);
+                    }
+                }
+                else if (cmd.StartsWith("char") && cmd.Length > 4 && int.TryParse(cmd.Substring(4, 1), out int sDigit))
+                {
+                    slot = sDigit;
+                    if (parts.Length > 1) int.TryParse(parts[1], out charNum);
+                }
+                else if (cmd.StartsWith("c") && cmd.Length > 1 && int.TryParse(cmd.Substring(1, 1), out int cDigit))
+                {
+                    slot = cDigit;
+                    if (parts.Length > 1) int.TryParse(parts[1], out charNum);
+                }
+
+                slot = Math.Clamp(slot, 1, 3);
+                charNum = Math.Clamp(charNum, 1, 9);
+
+                if (_telegramListener.OnSwitchCharacter != null)
+                {
+                    var (success, imagePath, msg) = await _telegramListener.OnSwitchCharacter.Invoke(slot, charNum);
+                    AddLog($"[TEST-RESULT] Ganti Karakter Slot {slot} ke Char {charNum}: {(success ? "SUKSES" : "GAGAL")}");
+                    if (!string.IsNullOrEmpty(msg)) AddLog($"[INFO] {msg}");
+                }
+                else
+                {
+                    AddLog("[ERROR] Handler OnSwitchCharacter belum siap.");
+                }
+            }
+            else if (cmd.StartsWith("bag") || cmd.StartsWith("cektas") || cmd.StartsWith("tas"))
+            {
+                if (cmd == "allbag" || cmd == "cektasall")
+                {
+                    for (int s = 1; s <= 3; s++)
+                    {
+                        if (_telegramListener.OnCheckBackpack != null)
+                        {
+                            var (ok, img, msg) = await _telegramListener.OnCheckBackpack.Invoke(s);
+                            AddLog($"[TEST-RESULT] Cek Tas Slot {s}: {(ok ? "SUKSES" : "GAGAL")} - {msg}");
+                        }
+                        if (s < 3) await Task.Delay(1000);
+                    }
+                }
+                else
+                {
+                    int slot = 1;
+                    if (parts.Length > 1 && int.TryParse(parts[1], out int pSlot)) slot = pSlot;
+                    else if (cmd.Length > 3 && int.TryParse(cmd.Substring(cmd.Length - 1), out int endDigit)) slot = endDigit;
+
+                    slot = Math.Clamp(slot, 1, 3);
+                    if (_telegramListener.OnCheckBackpack != null)
+                    {
+                        var (ok, img, msg) = await _telegramListener.OnCheckBackpack.Invoke(slot);
+                        AddLog($"[TEST-RESULT] Cek Tas Slot {slot}: {(ok ? "SUKSES" : "GAGAL")} - {msg}");
+                    }
+                }
+            }
+            else if (cmd == "tile")
+            {
+                int count = AutoTileService.TileGameWindows(_config.TargetWindowTitle);
+                AddLog($"[TEST-RESULT] Berhasil merapikan {count} jendela game (Order by PID).");
+            }
+            else if (cmd == "status")
+            {
+                if (_telegramListener.OnGetStatus != null)
+                {
+                    string status = await _telegramListener.OnGetStatus.Invoke();
+                    AddLog($"[TEST-RESULT] Status Realtime:\n{status}");
+                }
+            }
+            else if (cmd == "ss" || cmd == "screenshot")
+            {
+                if (_telegramListener.OnTakeScreenshot != null)
+                {
+                    string? path = await _telegramListener.OnTakeScreenshot.Invoke();
+                    AddLog($"[TEST-RESULT] Screenshot berhasil disimpan di: {path}");
+                }
+            }
+            else if (cmd == "allsloton")
+            {
+                SetSlotMonitoring(1, true);
+                SetSlotMonitoring(2, true);
+                SetSlotMonitoring(3, true);
+                AddLog("[TEST-RESULT] Monitoring SEMUA slot diaktifkan (ON).");
+            }
+            else if (cmd == "allslotoff")
+            {
+                SetSlotMonitoring(1, false);
+                SetSlotMonitoring(2, false);
+                SetSlotMonitoring(3, false);
+                AddLog("[TEST-RESULT] Monitoring SEMUA slot dinonaktifkan (OFF).");
+            }
+            else if (cmd == "alltabon")
+            {
+                SetAutoTabSlot(1, true);
+                SetAutoTabSlot(2, true);
+                SetAutoTabSlot(3, true);
+                AddLog("[TEST-RESULT] Auto TAB SEMUA slot diaktifkan (ON).");
+            }
+            else if (cmd == "alltaboff")
+            {
+                SetAutoTabSlot(1, false);
+                SetAutoTabSlot(2, false);
+                SetAutoTabSlot(3, false);
+                AddLog("[TEST-RESULT] Auto TAB SEMUA slot dinonaktifkan (OFF).");
+            }
+            else if (cmd.StartsWith("tab") && cmd.Length >= 5)
+            {
+                int slot = int.Parse(cmd.Substring(3, 1));
+                bool enable = cmd.EndsWith("on");
+                SetAutoTabSlot(slot, enable);
+                AddLog($"[TEST-RESULT] Auto TAB Slot {slot} diubah ke {(enable ? "ON" : "OFF")}.");
+            }
+            else if (cmd.StartsWith("slot") && cmd.Length >= 6)
+            {
+                int slot = int.Parse(cmd.Substring(4, 1));
+                bool enable = cmd.EndsWith("on");
+                SetSlotMonitoring(slot, enable);
+                AddLog($"[TEST-RESULT] Monitoring Slot {slot} diubah ke {(enable ? "ON" : "OFF")}.");
+            }
+            else
+            {
+                AddLog($"[WARN] Perintah '{rawText}' tidak dikenali.");
+            }
+        }
+        catch (Exception ex)
+        {
+            AddLog($"[ERROR] Eksekusi perintah test gagal: {ex.Message}");
+        }
+        finally
+        {
+            BtnRunTestCommand.IsEnabled = true;
         }
     }
 
@@ -1067,8 +1559,211 @@ public partial class MainWindow : Window
         }
     }
 
+    private void InitTelegramListener()
+    {
+        _telegramListener.OnLog = msg => AddLog(msg);
+
+        _telegramListener.OnGetStatus = () =>
+        {
+            return Dispatcher.Invoke(() =>
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine($"📊 *Status {_config.GameName} Bot Monitor*");
+                sb.AppendLine($"🕒 `{DateTime.Now:yyyy-MM-dd HH:mm:ss}`");
+                sb.AppendLine($"⚡ Pemantauan: `{(_isMonitoring ? "AKTIF" : "NONAKTIF")}`\n");
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var s = _slots[i];
+                    string statusIcon = s.Status == ClientStatus.Alive ? "🟢" : (s.Status == ClientStatus.Dead ? "🔴" : "⚪");
+                    string slotStatus = s.IsEnabled ? "ON" : "OFF";
+                    string tabStatus = s.IsAutoTabEnabled ? "ON" : "OFF";
+                    sb.AppendLine($"{statusIcon} *Slot {s.SlotIndex}:* {s.StatusBadgeText} [Slot: {slotStatus} | TAB: {tabStatus}]");
+                    if (s.ProcessId > 0)
+                    {
+                        sb.AppendLine($"   PID: `{s.ProcessId}` | Window: `{s.WindowTitle}`");
+                    }
+                    sb.AppendLine($"   Info: `{s.LastInfo}`");
+                }
+                return Task.FromResult(sb.ToString());
+            });
+        };
+
+        _telegramListener.OnTakeScreenshot = () =>
+        {
+            return Dispatcher.Invoke(async () =>
+            {
+                try
+                {
+                    string dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Capture", "Remote");
+                    Directory.CreateDirectory(dir);
+                    string path = Path.Combine(dir, $"ss_{DateTime.Now:yyyyMMdd_HHmmss}.png");
+
+                    int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
+                    int screenHeight = (int)SystemParameters.PrimaryScreenHeight;
+
+                    using var bmp = new System.Drawing.Bitmap(screenWidth, screenHeight);
+                    using (var g = System.Drawing.Graphics.FromImage(bmp))
+                    {
+                        g.CopyFromScreen(0, 0, 0, 0, new System.Drawing.Size(screenWidth, screenHeight));
+                    }
+                    bmp.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+                    return await Task.FromResult<string?>(path);
+                }
+                catch (Exception ex)
+                {
+                    AddLog($"[ERROR] Remote screenshot gagal: {ex.Message}");
+                    return null;
+                }
+            });
+        };
+
+        _telegramListener.OnTileWindows = () =>
+        {
+            return Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    int count = AutoTileService.TileGameWindows(_config.TargetWindowTitle);
+                    AddLog($"[REMOTE] AutoTile dipanggil via Telegram. Merapikan {count} jendela.");
+                    return Task.FromResult(count > 0);
+                }
+                catch
+                {
+                    return Task.FromResult(false);
+                }
+            });
+        };
+
+        _telegramListener.OnToggleMonitoring = (start) =>
+        {
+            return Dispatcher.Invoke(() =>
+            {
+                if (start && !_isMonitoring)
+                {
+                    BtnToggleMonitoring_Click(BtnToggleMonitoring, new RoutedEventArgs());
+                    return Task.FromResult("▶️ Pemantauan bot berhasil DINYALAKAN.");
+                }
+                else if (!start && _isMonitoring)
+                {
+                    BtnToggleMonitoring_Click(BtnToggleMonitoring, new RoutedEventArgs());
+                    return Task.FromResult("⏹️ Pemantauan bot berhasil DIMATIKAN.");
+                }
+                else
+                {
+                    string state = _isMonitoring ? "sudah AKTIF" : "sudah NONAKTIF";
+                    return Task.FromResult($"ℹ️ Status pemantauan saat ini {state}.");
+                }
+            });
+        };
+
+        _telegramListener.OnCheckBackpack = async (slotNum) =>
+        {
+            return await Dispatcher.Invoke(async () =>
+            {
+                int idx = slotNum - 1;
+                if (idx < 0 || idx >= _slots.Count)
+                {
+                    return (false, null, $"❌ Nomor slot {slotNum} tidak valid (Gunakan 1-3).");
+                }
+
+                var slot = _slots[idx];
+                if (slot.WindowHandle == 0 || slot.Status == ClientStatus.Offline)
+                {
+                    return (false, null, $"❌ Slot {slotNum} offline / jendela tidak ditemukan.");
+                }
+
+                return await BackpackInspectorService.InspectBackpackAsync(
+                    slot.WindowHandle, 
+                    slotNum, 
+                    slot.WindowTitle, 
+                    (hWnd, sc, hold) => SendHardwareKey(hWnd, sc, hold));
+            });
+        };
+
+        _telegramListener.OnSwitchCharacter = (slotNum, charNum) =>
+        {
+            return Dispatcher.Invoke(async () =>
+            {
+                int idx = slotNum - 1;
+                if (idx < 0 || idx >= _slots.Count)
+                {
+                    return (false, null, $"❌ Slot {slotNum} tidak valid.");
+                }
+
+                var slot = _slots[idx];
+                if (slot.WindowHandle == 0 || slot.Status == ClientStatus.Offline)
+                {
+                    return (false, null, $"❌ Slot {slotNum} offline / jendela tidak ditemukan.");
+                }
+
+                bool wasAutoTabEnabled = slot.IsAutoTabEnabled;
+                if (wasAutoTabEnabled)
+                {
+                    SetAutoTabSlot(slotNum, false);
+                    AddLog($"[REMOTE] Auto TAB Slot {slotNum} di-pause sementara untuk pergantian karakter.");
+                }
+
+                AddLog($"[REMOTE] Memulai ganti karakter Slot {slotNum} ke Karakter {charNum}...");
+
+                var result = await CharacterSwitcherService.SwitchCharacterAsync(
+                    slot.WindowHandle,
+                    slotNum,
+                    charNum,
+                    slot.WindowTitle,
+                    (hWnd, sc, hold) => SendHardwareKey(hWnd, sc, hold),
+                    () =>
+                    {
+                        var (color, _) = PixelHealthScanner.SampleHpColor(slot.WindowHandle, _config.HpOffsetX, _config.HpOffsetY);
+                        return PixelHealthScanner.IsHpAlive(color);
+                    },
+                    _config.CharSwitch);
+
+                if (wasAutoTabEnabled)
+                {
+                    SetAutoTabSlot(slotNum, true);
+                    AddLog($"[REMOTE] Auto TAB Slot {slotNum} dipulihkan (ON).");
+                }
+
+                AddLog($"[REMOTE] Hasil pergantian karakter Slot {slotNum}: {(result.success ? "SUKSES" : "GAGAL")}");
+                return result;
+            });
+        };
+
+        _telegramListener.OnToggleSlot = (slotNum, enable) =>
+        {
+            return Dispatcher.Invoke(() =>
+            {
+                bool ok = SetSlotMonitoring(slotNum, enable);
+                if (ok)
+                {
+                    string status = enable ? "🟢 AKTIF (ON)" : "⚪ NONAKTIF (OFF)";
+                    return Task.FromResult($"🔔 Monitoring Slot {slotNum} berhasil diubah ke {status}.");
+                }
+                return Task.FromResult($"❌ Gagal mengubah status Slot {slotNum}.");
+            });
+        };
+
+        _telegramListener.OnToggleAutoTab = (slotNum, enable) =>
+        {
+            return Dispatcher.Invoke(() =>
+            {
+                bool ok = SetAutoTabSlot(slotNum, enable);
+                if (ok)
+                {
+                    string status = enable ? "🟢 AKTIF (ON)" : "⚪ NONAKTIF (OFF)";
+                    return Task.FromResult($"🎯 Auto TAB Slot {slotNum} berhasil diubah ke {status}.");
+                }
+                return Task.FromResult($"❌ Gagal mengubah Auto TAB Slot {slotNum}.");
+            });
+        };
+
+        _telegramListener.Start(_config);
+    }
+
     protected override void OnClosed(EventArgs e)
     {
+        _telegramListener.Stop();
         _scanTimer.Stop();
         _soundService.Stop();
         _notifyIcon?.Dispose();

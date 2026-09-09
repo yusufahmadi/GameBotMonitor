@@ -62,6 +62,19 @@ Jika karakter mati (darah 0) atau klien game mengalami crash/freeze, aplikasi ak
     - Tombol **"Simpan Semua Pengaturan"** dibuat *docked* di bagian bawah tab agar selalu terlihat dan langsung bisa diklik tanpa perlu scrolling.
     - Menutup jendela (tombol `X`) otomatis meminimalkan aplikasi ke System Tray di pojok kanan bawah agar pemantauan tetap berjalan di latar belakang.
 
+11. **🎮 Remote Control Telegram Interaktif (2-Way)**
+    - Aplikasi mendengarkan perintah langsung dari Telegram di smartphone Anda secara real-time via long-polling (tanpa perlu port forwarding).
+    - **Aman (Security Whitelist)**: Hanya merespons dari `Chat ID` milik Anda yang terdaftar di Pengaturan.
+    - **Daftar Perintah Lengkap**:
+      - 📊 `/status` : Menampilkan ringkasan status realtime ketiga slot karakter.
+      - 📸 `/ss` : Mengambil live screenshot layar desktop PC dan mengirim fotonya ke HP.
+      - 📐 `/tile` : Merapikan susunan jendela game ke posisi berdampingan 1-2-3 dari jauh.
+      - ▶️ `/start` / ⏹️ `/stop` : Menyalakan atau mematikan pemantauan bot.
+      - 🎒 `/bag1`, `/bag2`, `/bag3` : Buka tas slot target (tombol `B`), foto sisa slot & total Gold, lalu tutup tas kembali secara otomatis.
+      - 🔔 `/slot1on` / `/slot1off`, `/slot2on`, dll : Menyalakan / mematikan alert pemantauan per slot.
+      - 🎯 `/tab1on` / `/tab1off`, `/tab2on`, dll : Menyalakan / mematikan Auto Assist TAB per slot.
+      - ℹ️ `/help` : Menampilkan menu panduan perintah.
+
 ---
 
 ## 🖥️ Kebutuhan Sistem
@@ -135,12 +148,14 @@ GameBotMonitor/
 │   └── Win32.cs                 # Interop P/Invoke API Windows (user32, gdi32)
 ├── Services/
 │   ├── AutoTileService.cs       # Penataan otomatis multi-jendela game
+│   ├── BackpackInspectorService.cs # Inspeksi tas game (tombol B, snapshot gold & slot)
 │   ├── ConfigService.cs         # Serialisasi & deserialisasi config.json
 │   ├── DiscordNotifier.cs       # Integrasi pengiriman Discord Webhook
 │   ├── LanguageService.cs       # Layanan lokalisasi kamus bahasa ID & EN
 │   ├── PixelHealthScanner.cs    # Algoritma sampling warna HP & screen capture
 │   ├── SoundAlertService.cs     # Pemutar alarm audio lokal (WAV)
 │   ├── StorageCleanupService.cs # Manajemen penyimpanan & rotasi folder screenshot
+│   ├── TelegramBotListener.cs   # Background listener Telegram 2-arah (Remote Control)
 │   ├── TelegramNotifier.cs      # Integrasi Telegram Bot API (SendPhoto / SendMessage)
 │   └── WindowTrackerService.cs  # Pelacak handle jendela game aktif
 ├── Views/

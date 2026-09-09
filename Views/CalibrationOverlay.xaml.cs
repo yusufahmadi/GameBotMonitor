@@ -9,16 +9,24 @@ public partial class CalibrationOverlay : Window
 {
     public int ResultOffsetX { get; private set; } = -1;
     public int ResultOffsetY { get; private set; } = -1;
+    public int WindowWidth { get; private set; } = 0;
+    public int WindowHeight { get; private set; } = 0;
+    public int CenterOffsetX => ResultOffsetX - (WindowWidth / 2);
+    public int CenterOffsetY => ResultOffsetY - (WindowHeight / 2);
+    public double PercentX => WindowWidth > 0 ? (ResultOffsetX / (double)WindowWidth) * 100.0 : 0.0;
+    public double PercentY => WindowHeight > 0 ? (ResultOffsetY / (double)WindowHeight) * 100.0 : 0.0;
     public bool IsSuccess { get; private set; }
 
     private readonly string _targetKeyword;
     private readonly string _gameName;
+    private readonly bool _showDefaultSuccessDialog;
 
-    public CalibrationOverlay(string targetKeyword = "Grand Fantasia", string gameName = "Grand Fantasia", string? customInstruction = null)
+    public CalibrationOverlay(string targetKeyword = "Grand Fantasia", string gameName = "Grand Fantasia", string? customInstruction = null, bool showDefaultSuccessDialog = true)
     {
         InitializeComponent();
         _targetKeyword = targetKeyword;
         _gameName = string.IsNullOrWhiteSpace(gameName) ? targetKeyword : gameName;
+        _showDefaultSuccessDialog = showDefaultSuccessDialog;
         TxtInstruction.Text = customInstruction ?? $"Arahkan kursor dan KLIK 1 KALI tepat di bar darah jendela game {_gameName}.";
     }
 
@@ -46,20 +54,25 @@ public partial class CalibrationOverlay : Window
 
             if (matchedWindow != null)
             {
+                WindowWidth = matchedWindow.Rect.Width;
+                WindowHeight = matchedWindow.Rect.Height;
                 ResultOffsetX = clickX - matchedWindow.Rect.Left;
                 ResultOffsetY = clickY - matchedWindow.Rect.Top;
                 IsSuccess = true;
 
-                WpfMessageBox.Show(
-                    $"Kalibrasi Berhasil!\n\n" +
-                    $"Jendela: {matchedWindow.Title}\n" +
-                    $"Offset X: {ResultOffsetX}\n" +
-                    $"Offset Y: {ResultOffsetY}\n\n" +
-                    $"Koordinat relatif ini telah disimpan ke konfigurasi.",
-                    "Sukses Kalibrasi",
-                    WpfMessageBoxButton.OK,
-                    WpfMessageBoxImage.Information
-                );
+                if (_showDefaultSuccessDialog)
+                {
+                    WpfMessageBox.Show(
+                        $"Kalibrasi Berhasil!\n\n" +
+                        $"Jendela: {matchedWindow.Title}\n" +
+                        $"Offset X: {ResultOffsetX}\n" +
+                        $"Offset Y: {ResultOffsetY}\n\n" +
+                        $"Koordinat relatif ini telah disimpan ke konfigurasi.",
+                        "Sukses Kalibrasi",
+                        WpfMessageBoxButton.OK,
+                        WpfMessageBoxImage.Information
+                    );
+                }
             }
             else
             {

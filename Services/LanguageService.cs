@@ -99,6 +99,8 @@ public static class LanguageService
             // Settings - Telegram
             ["SecTelegram"] = "Telegram Bot",
             ["ChkTelegram"] = "Aktifkan Notifikasi Telegram",
+            ["ChkTelegramInteractive"] = "Aktifkan Remote Control 2 Arah (Terima Perintah dari HP)",
+            ["HintTelegramInteractive"] = "Mendukung: /status, /bag1-/bag3, /slot1on-/slot3off, /tab1on-/tab3off, /ss, /tile, /start, /stop",
             ["LblTelegramToken"] = "Telegram Bot Token:",
             ["LblTelegramChatId"] = "Chat ID Penerima:",
             ["BtnTestTelegram"] = "Test Telegram",
@@ -112,7 +114,7 @@ public static class LanguageService
 
             // Settings - Storage
             ["SecStorage"] = "Tangkapan Layar & Pembersihan (Auto-Cleanup):",
-            ["ChkCropHud"] = "Cukup kirim potongan bar darah / HUD karakter saja (Ukuran: 300x140 px)",
+            ["ChkCropHud"] = "Cukup kirim potongan bar darah / HUD karakter saja (Ukuran: 225x92 px)",
             ["StorageInfo1"] = "• Tangkapan layar otomatis disimpan ke: Capture/yyyy/MM/dd/",
             ["StorageInfo2"] = "• Otomatis menyimpan hanya 3 hari terakhir (folder lebih lama langsung dibersihkan)",
             ["StorageInfo3"] = "• Di setiap folder harian, maksimal tersimpan 10 tangkapan layar terakhir",
@@ -250,6 +252,8 @@ public static class LanguageService
             // Settings - Telegram
             ["SecTelegram"] = "Telegram Bot",
             ["ChkTelegram"] = "Enable Telegram Notifications",
+            ["ChkTelegramInteractive"] = "Enable 2-Way Remote Control (Receive Commands from Phone)",
+            ["HintTelegramInteractive"] = "Supports: /status, /bag1-/bag3, /slot1on-/slot3off, /tab1on-/tab3off, /ss, /tile, /start, /stop",
             ["LblTelegramToken"] = "Telegram Bot Token:",
             ["LblTelegramChatId"] = "Recipient Chat ID:",
             ["BtnTestTelegram"] = "Test Telegram",
@@ -263,7 +267,7 @@ public static class LanguageService
 
             // Settings - Storage
             ["SecStorage"] = "Screenshots & Storage Cleanup:",
-            ["ChkCropHud"] = "Only send cropped character HP bar / HUD (Size: 300x140 px)",
+            ["ChkCropHud"] = "Only send cropped character HP bar / HUD (Size: 225x92 px)",
             ["StorageInfo1"] = "• Screenshots automatically saved to: Capture/yyyy/MM/dd/",
             ["StorageInfo2"] = "• Retains only the last 3 days (older folders auto-cleaned)",
             ["StorageInfo3"] = "• Each daily folder retains a maximum of 10 screenshots",

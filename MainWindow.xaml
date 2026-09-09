@@ -479,13 +479,57 @@
                 <TabItem x:Name="TabLogsItem" Header="Log Aktivitas">
                     <Grid Margin="16">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBox x:Name="TxtLogs" Grid.Row="0" IsReadOnly="True" VerticalScrollBarVisibility="Auto" 
+
+                        <!-- Testing Feature Console -->
+                        <Border Grid.Row="0" Background="#181825" BorderBrush="#313244" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="⚡ Test Perintah:" FontWeight="SemiBold" FontSize="12" Foreground="#89B4FA" VerticalAlignment="Center"/>
+                                <ComboBox x:Name="CmbTestCommand" Grid.Column="2" IsEditable="True" Height="30" VerticalContentAlignment="Center"
+                                          Background="#11111B" Foreground="#11111B" BorderBrush="#45475A">
+                                    <ComboBoxItem Content="char2 1" IsSelected="True"/>
+                                    <ComboBoxItem Content="char1 2"/>
+                                    <ComboBoxItem Content="char3 1"/>
+                                    <ComboBoxItem Content="char1 1"/>
+                                    <ComboBoxItem Content="char2 2"/>
+                                    <ComboBoxItem Content="char3 3"/>
+                                    <ComboBoxItem Content="bag1"/>
+                                    <ComboBoxItem Content="bag2"/>
+                                    <ComboBoxItem Content="bag3"/>
+                                    <ComboBoxItem Content="allbag"/>
+                                    <ComboBoxItem Content="tile"/>
+                                    <ComboBoxItem Content="status"/>
+                                    <ComboBoxItem Content="ss"/>
+                                    <ComboBoxItem Content="allsloton"/>
+                                    <ComboBoxItem Content="allslotoff"/>
+                                    <ComboBoxItem Content="alltabon"/>
+                                    <ComboBoxItem Content="alltaboff"/>
+                                    <ComboBoxItem Content="tab1on"/>
+                                    <ComboBoxItem Content="tab1off"/>
+                                    <ComboBoxItem Content="tab2on"/>
+                                    <ComboBoxItem Content="tab2off"/>
+                                    <ComboBoxItem Content="tab3on"/>
+                                    <ComboBoxItem Content="tab3off"/>
+                                </ComboBox>
+                                <Button x:Name="BtnRunTestCommand" Grid.Column="4" Content="▶ Jalankan (Run)" Width="130" Height="30"
+                                        Style="{StaticResource PrimaryButton}" Click="BtnRunTestCommand_Click"/>
+                            </Grid>
+                        </Border>
+
+                        <TextBox x:Name="TxtLogs" Grid.Row="1" IsReadOnly="True" VerticalScrollBarVisibility="Auto" 
                                   FontFamily="Consolas" FontSize="12" Background="#11111B" BorderBrush="#313244"
                                   TextWrapping="Wrap" Margin="0,0,0,10"/>
-                        <Button x:Name="BtnClearLogs" Grid.Row="1" Content="Hapus Log" Width="100" HorizontalAlignment="Right" Style="{StaticResource ModernButton}" Click="BtnClearLogs_Click"/>
+                        <Button x:Name="BtnClearLogs" Grid.Row="2" Content="Hapus Log" Width="100" HorizontalAlignment="Right" Style="{StaticResource ModernButton}" Click="BtnClearLogs_Click"/>
                     </Grid>
                 </TabItem>
 
@@ -537,7 +581,7 @@
                             </Grid>
 
                             <StackPanel Margin="0,0,0,16">
-                                <CheckBox x:Name="ChkShowHudBackground" Content="Tampilkan cuplikan info karakter sebagai background kartu slot" IsChecked="False" Margin="0,0,0,4"/>
+                                <CheckBox x:Name="ChkShowHudBackground" Content="Tampilkan cuplikan info karakter sebagai background kartu slot" IsChecked="False" Margin="0,0,0,4" Click="ChkShowHudBackground_Click"/>
                                 <TextBlock x:Name="HintShowHudBackground" Text="Menampilkan gambar live HUD karakter (avatar &amp; bar HP) di latar belakang kartu saat aktif" FontSize="10" Foreground="#6C7086"/>
                             </StackPanel>
 
@@ -684,7 +728,9 @@
 
                             <!-- Group Telegram -->
                             <TextBlock x:Name="SecTelegramHeader" Text="Telegram Bot" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
-                            <CheckBox x:Name="ChkTelegramEnabled" Content="Aktifkan Notifikasi Telegram" IsChecked="False" Margin="0,0,0,8"/>
+                            <CheckBox x:Name="ChkTelegramEnabled" Content="Aktifkan Notifikasi Telegram" IsChecked="False" Margin="0,0,0,4"/>
+                            <CheckBox x:Name="ChkTelegramInteractive" Content="Aktifkan Remote Control 2 Arah (Terima Perintah dari HP)" IsChecked="True" Margin="0,0,0,4"/>
+                            <TextBlock x:Name="HintTelegramInteractive" Text="Mendukung: /status, /bag1-/bag3, /slot1on-/slot3off, /tab1on-/tab3off, /ss, /tile, /start, /stop" FontSize="10" Foreground="#6C7086" Margin="0,0,0,8"/>
                             <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -725,11 +771,168 @@
 
                             <Separator Background="#313244" Margin="0,0,0,16"/>
 
+                            <!-- Group Character Switch Mapping -->
+                            <TextBlock x:Name="SecCharSwitchHeader" Text="Pemetaan Posisi Tombol Ganti Karakter (Character Switch Mapping)" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <Border Background="#11111B" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Koordinat &amp; Offset Klik Menu (In-Game Grand Fantasia):" FontWeight="SemiBold" FontSize="12" Foreground="#F9E2AF" Margin="0,0,0,8"/>
+                                    
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Logout Offset Y (px):" FontSize="11" Foreground="#BAC2DE" Margin="0,0,0,2"/>
+                                            <TextBox x:Name="TxtLogoutOffsetY" Text="78" ToolTip="Offset Y dari center window ke tombol Logout"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Return Offset X (px):" FontSize="11" Foreground="#BAC2DE" Margin="0,0,0,2"/>
+                                            <TextBox x:Name="TxtReturnOffsetX" Text="-45" ToolTip="Offset X dari center window ke tombol Return"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Text="Return Offset Y (px):" FontSize="11" Foreground="#BAC2DE" Margin="0,0,0,2"/>
+                                            <TextBox x:Name="TxtReturnOffsetY" Text="32" ToolTip="Offset Y dari center window ke tombol Return"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Start Game X (%):" FontSize="11" Foreground="#BAC2DE" Margin="0,0,0,2"/>
+                                            <TextBox x:Name="TxtStartGamePercentX" Text="50.0" ToolTip="Persentase horizontal posisi tombol Start Game"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Start Game Y (%):" FontSize="11" Foreground="#BAC2DE" Margin="0,0,0,2"/>
+                                            <TextBox x:Name="TxtStartGamePercentY" Text="98.1" ToolTip="Persentase vertikal posisi tombol Start Game"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Posisi HUD Kartu Karakter 1, 2, 3 -->
+                                    <TextBlock Text="Posisi HUD Kartu Karakter (Kanan):" FontSize="11" FontWeight="SemiBold" Foreground="#BAC2DE" Margin="0,4,0,2"/>
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="6"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="6"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="6"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Card1 X (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtCard1PercentX" Text="85.4"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Card1 Y (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtCard1PercentY" Text="17.1"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Text="Card2 X (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtCard2PercentX" Text="85.4"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="6">
+                                            <TextBlock Text="Card2 Y (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtCard2PercentY" Text="39.4"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="8">
+                                            <TextBlock Text="Card3 X (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtCard3PercentX" Text="85.4"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="10">
+                                            <TextBlock Text="Card3 Y (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtCard3PercentY" Text="61.8"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Posisi Navigasi Halaman Karakter -->
+                                    <TextBlock Text="Posisi Tombol Navigasi Halaman Karakter:" FontSize="11" FontWeight="SemiBold" Foreground="#BAC2DE" Margin="0,0,0,2"/>
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Prev ◀ X (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtPagePrevPercentX" Text="73.8"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Prev ◀ Y (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtPagePrevPercentY" Text="77.2"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Text="Next ▶ X (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtPageNextPercentX" Text="84.4"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="6">
+                                            <TextBlock Text="Next ▶ Y (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBox x:Name="TxtPageNextPercentY" Text="77.2"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Calibration Buttons -->
+                                    <Grid Margin="0,6,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button x:Name="BtnCalibrateLogout" Grid.Column="0" Content="🎯 Kalibrasi Logout" Style="{StaticResource ModernButton}" Click="BtnCalibrateLogout_Click" ToolTip="Buka menu ESC di game, lalu klik tombol ini untuk menandai posisi tombol Logout"/>
+                                        <Button x:Name="BtnCalibrateReturn" Grid.Column="2" Content="🎯 Kalibrasi Return" Style="{StaticResource ModernButton}" Click="BtnCalibrateReturn_Click" ToolTip="Munculkan dialog Quit countdown di game, lalu klik tombol ini untuk menandai posisi tombol Return"/>
+                                        <Button x:Name="BtnCalibrateStartGame" Grid.Column="4" Content="🎯 Kalibrasi Start" Style="{StaticResource ModernButton}" Click="BtnCalibrateStartGame_Click" ToolTip="Di layar pemilihan karakter, klik tombol ini untuk menandai posisi tombol Start Game"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button x:Name="BtnCalibrateCard1" Grid.Column="0" Content="🎯 Kalibrasi Card 1" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard1_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 1"/>
+                                        <Button x:Name="BtnCalibrateCard2" Grid.Column="2" Content="🎯 Kalibrasi Card 2" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard2_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 2"/>
+                                        <Button x:Name="BtnCalibrateCard3" Grid.Column="4" Content="🎯 Kalibrasi Card 3" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard3_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 3"/>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button x:Name="BtnCalibratePagePrev" Grid.Column="0" Content="🎯 Kalibrasi Panah Prev ◀" Style="{StaticResource ModernButton}" Click="BtnCalibratePagePrev_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik tombol panah ◀"/>
+                                        <Button x:Name="BtnCalibratePageNext" Grid.Column="2" Content="🎯 Kalibrasi Panah Next ▶" Style="{StaticResource ModernButton}" Click="BtnCalibratePageNext_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik tombol panah ▶"/>
+                                    </Grid>
+
+                                    <TextBlock Text="*Catatan: Anda bisa klik tombol 'Kalibrasi' di atas untuk mengklik langsung tombol target di jendela game secara visual." FontSize="10" Foreground="#6C7086"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Separator Background="#313244" Margin="0,0,0,16"/>
+
                             <!-- Group Storage Info -->
                             <Border Background="#11111B" CornerRadius="8" Padding="12" Margin="0,0,0,16">
                                 <StackPanel>
                                     <TextBlock x:Name="SecStorageHeader" Text="Tangkapan Layar &amp; Pembersihan (Auto-Cleanup):" FontWeight="SemiBold" FontSize="12" Foreground="#F9E2AF"/>
-                                    <CheckBox x:Name="ChkCropHudOnly" Content="Cukup kirim potongan bar darah / HUD karakter saja (Ukuran: 300x140 px)" IsChecked="True" Margin="0,8,0,6"/>
+                                    <CheckBox x:Name="ChkCropHudOnly" Content="Cukup kirim potongan bar darah / HUD karakter saja (Ukuran: 225x92 px)" IsChecked="True" Margin="0,8,0,6"/>
                                     <TextBlock x:Name="TxtStorageInfo1" Text="• Tangkapan layar otomatis disimpan ke: Capture/yyyy/MM/dd/" FontSize="11" Foreground="#A6ADC8" Margin="0,2,0,0"/>
                                     <TextBlock x:Name="TxtStorageInfo2" Text="• Otomatis menyimpan hanya 3 hari terakhir (folder lebih lama langsung dibersihkan)" FontSize="11" Foreground="#A6ADC8"/>
                                     <TextBlock x:Name="TxtStorageInfo3" Text="• Di setiap folder harian, maksimal tersimpan 10 tangkapan layar terakhir" FontSize="11" Foreground="#A6ADC8"/>

@@ -18,6 +18,31 @@ public class AppConfig
     public SoundConfig SoundAlert { get; set; } = new();
     public StorageConfig Storage { get; set; } = new();
     public AutoTabConfig AutoTab { get; set; } = new();
+    public CharacterSwitchConfig CharSwitch { get; set; } = new();
+}
+
+public class CharacterSwitchConfig
+{
+    public int LogoutOffsetX { get; set; } = 0;
+    public int LogoutOffsetY { get; set; } = 78; // Y offset dari center window ke tombol Logout (di bawah Channel)
+    public int ReturnOffsetX { get; set; } = -45; // X offset dari center window ke tombol Return (bypass countdown 10s)
+    public int ReturnOffsetY { get; set; } = 32;  // Y offset dari center window ke tombol Return
+    public double StartGamePercentX { get; set; } = 50.0; // Persentase X tombol Start Game di bawah
+    public double StartGamePercentY { get; set; } = 98.1; // Persentase Y tombol Start Game di bawah
+
+    // HUD Kartu Karakter 1, 2, 3 di sebelah kanan
+    public double Card1PercentX { get; set; } = 85.4;
+    public double Card1PercentY { get; set; } = 17.1;
+    public double Card2PercentX { get; set; } = 85.4;
+    public double Card2PercentY { get; set; } = 39.4;
+    public double Card3PercentX { get; set; } = 85.4;
+    public double Card3PercentY { get; set; } = 61.8;
+
+    // Tombol Navigasi Halaman Karakter (Prev ◀ & Next ▶)
+    public double PagePrevPercentX { get; set; } = 73.8;
+    public double PagePrevPercentY { get; set; } = 77.2;
+    public double PageNextPercentX { get; set; } = 84.4;
+    public double PageNextPercentY { get; set; } = 77.2;
 }
 
 public class AutoTabConfig
@@ -45,6 +70,8 @@ public class TelegramConfig
     public string BotToken { get; set; } = "";
     public string ChatId { get; set; } = "";
     public bool SendScreenshot { get; set; } = true;
+    public bool InteractiveEnabled { get; set; } = true;
+    public double PollingIntervalSeconds { get; set; } = 2.0;
 }
 
 public class SoundConfig
@@ -60,6 +87,6 @@ public class StorageConfig
     public int MaxDaysRetention { get; set; } = 3;
     public int MaxScreenshotsPerDay { get; set; } = 10;
     public bool CropHudOnly { get; set; } = true;
-    public int CropWidth { get; set; } = 300;
-    public int CropHeight { get; set; } = 140;
+    public int CropWidth { get; set; } = 225;
+    public int CropHeight { get; set; } = 92;
 }

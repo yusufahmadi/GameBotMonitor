@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using GameBotMonitor.Native;
 
@@ -7,7 +8,7 @@ public static class AutoTileService
 {
     public static int TileGameWindows(string targetTitleKeyword = "Grand Fantasia")
     {
-        var handles = new List<nint>();
+        var windowEntries = new List<(nint hWnd, uint pid)>();
 
         Win32.EnumWindows((hWnd, lParam) =>
         {
@@ -22,13 +23,18 @@ public static class AutoTileService
 
             if (title.Contains(targetTitleKeyword, StringComparison.OrdinalIgnoreCase))
             {
-                handles.Add(hWnd);
+                Win32.GetWindowThreadProcessId(hWnd, out uint pid);
+                windowEntries.Add((hWnd, pid));
             }
 
             return true;
         }, 0);
 
-        if (handles.Count == 0) return 0;
+        if (windowEntries.Count == 0) return 0;
+
+        // Urutkan berdasarkan PID (Process ID) secara ascending:
+        // PID terkecil di sebelah kiri (Slot 1), berikutnya di tengah (Slot 2), dan kanan (Slot 3)
+        var handles = windowEntries.OrderBy(w => w.pid).Select(w => w.hWnd).ToList();
 
         // Ambil area kerja layar utama (tidak tertutup taskbar)
         var workArea = System.Windows.SystemParameters.WorkArea;
