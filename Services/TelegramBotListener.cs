@@ -19,6 +19,7 @@ public class TelegramBotListener
     public Func<bool, Task<string>>? OnToggleMonitoring { get; set; }
     public Func<int, Task<(bool success, string? imagePath, string message)>>? OnCheckBackpack { get; set; }
     public Func<int, int, Task<(bool success, string? imagePath, string message)>>? OnSwitchCharacter { get; set; }
+    public Func<int, int, string, Task<(bool success, string? imagePath, string message)>>? OnEnterSml { get; set; }
     public Func<int, bool, Task<string>>? OnToggleSlot { get; set; }
     public Func<int, bool, Task<string>>? OnToggleAutoTab { get; set; }
     public Action<string>? OnLog { get; set; }
@@ -97,6 +98,10 @@ public class TelegramBotListener
                             {
                                 await ProcessMessageAsync(msg, token, authorizedChatId);
                             }
+                            else if (item.TryGetProperty("callback_query", out var cbQuery))
+                            {
+                                await ProcessCallbackQueryAsync(cbQuery, token, authorizedChatId);
+                            }
                         }
                     }
                 }
@@ -147,7 +152,75 @@ public class TelegramBotListener
             string text = textProp.GetString()?.Trim() ?? "";
             if (string.IsNullOrWhiteSpace(text)) return;
 
-            OnLog?.Invoke($"[REMOTE] Telegram command diterima: '{text}'");
+            await ProcessCommandTextAsync(text, token, authorizedChatId);
+        }
+        catch (Exception ex)
+        {
+            OnLog?.Invoke($"[ERROR] Telegram processing error: {ex.Message}");
+        }
+    }
+
+    private async Task ProcessCallbackQueryAsync(JsonElement cbQuery, string token, string authorizedChatId)
+    {
+        try
+        {
+            string queryId = cbQuery.TryGetProperty("id", out var idProp) ? idProp.GetString() ?? "" : "";
+
+            string incomingChatId = "";
+            long messageId = 0;
+            if (cbQuery.TryGetProperty("message", out var msg))
+            {
+                if (msg.TryGetProperty("message_id", out var midProp))
+                {
+                    messageId = midProp.GetInt64();
+                }
+                if (msg.TryGetProperty("chat", out var chat) && chat.TryGetProperty("id", out var chatIdProp))
+                {
+                    incomingChatId = chatIdProp.ToString();
+                }
+            }
+
+            if (incomingChatId != authorizedChatId)
+            {
+                OnLog?.Invoke($"[WARN] Telegram callback query dari Chat ID tidak dikenal ({incomingChatId}). Diabaikan demi keamanan.");
+                return;
+            }
+
+            // Hentikan loading spinner di tombol Telegram pengguna
+            if (!string.IsNullOrEmpty(queryId))
+            {
+                _ = TelegramNotifier.AnswerCallbackQueryAsync(token, queryId);
+            }
+
+            if (cbQuery.TryGetProperty("data", out var dataProp))
+            {
+                string data = dataProp.GetString()?.Trim() ?? "";
+                if (!string.IsNullOrWhiteSpace(data))
+                {
+                    OnLog?.Invoke($"[REMOTE] Telegram inline button diklik: '{data}'");
+
+                    if (data.StartsWith("menu_"))
+                    {
+                        await HandleMenuNavigationAsync(token, authorizedChatId, messageId, data);
+                    }
+                    else
+                    {
+                        await ProcessCommandTextAsync(data, token, authorizedChatId);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            OnLog?.Invoke($"[ERROR] Telegram CallbackQuery error: {ex.Message}");
+        }
+    }
+
+    private async Task ProcessCommandTextAsync(string text, string token, string authorizedChatId)
+    {
+        try
+        {
+            OnLog?.Invoke($"[REMOTE] Telegram command diproses: '{text}'");
 
             // Normalisasi perintah
             string cleanCmd = text.Split(' ')[0].ToLowerInvariant();
@@ -155,6 +228,12 @@ public class TelegramBotListener
             if (cleanCmd.Contains('@'))
             {
                 cleanCmd = cleanCmd.Split('@')[0];
+            }
+
+            // Deteksi langsung perintah format sml_1_1_max atau sml1-1-max
+            if (cleanCmd.StartsWith("sml_") || cleanCmd.StartsWith("/sml_") || cleanCmd.StartsWith("sml1-") || cleanCmd.StartsWith("sml2-") || cleanCmd.StartsWith("sml3-"))
+            {
+                cleanCmd = "sml";
             }
 
             switch (cleanCmd)
@@ -287,6 +366,63 @@ public class TelegramBotListener
                     await HandleSwitchCharacterAsync(token, authorizedChatId, 3, Math.Clamp(c3, 1, 9));
                     break;
 
+                // --- CLEAR SML (SPRITE MAGIC LAND) ---
+                // Format: /sml [slot] [lv] [floor] | sml_1_1_max | sml_1_1_90 | sml_1_1_-2 | /sml1 1 max
+                case "/sml":
+                case "sml":
+                case "/clearsml":
+                case "clearsml":
+                    int smlSlot = 1;
+                    int smlLv = 1;
+                    string smlFloor = "max";
+
+                    var smlParts = text.Split(new[] { ' ', '_' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (smlParts.Length >= 4)
+                    {
+                        int.TryParse(smlParts[1], out smlSlot);
+                        int.TryParse(smlParts[2], out smlLv);
+                        smlFloor = smlParts[3];
+                    }
+                    else if (smlParts.Length == 3)
+                    {
+                        int.TryParse(smlParts[1], out smlSlot);
+                        int.TryParse(smlParts[2], out smlLv);
+                    }
+                    else if (smlParts.Length == 2)
+                    {
+                        int.TryParse(smlParts[1], out smlLv);
+                    }
+
+                    smlSlot = Math.Clamp(smlSlot, 1, 3);
+                    smlLv = Math.Clamp(smlLv, 1, 4);
+                    await HandleEnterSmlAsync(token, authorizedChatId, smlSlot, smlLv, smlFloor);
+                    break;
+
+                case "/sml1":
+                case "sml1":
+                case "/sml2":
+                case "sml2":
+                case "/sml3":
+                case "sml3":
+                    int targetSmlSlot = cleanCmd.Contains('2') ? 2 : (cleanCmd.Contains('3') ? 3 : 1);
+                    int targetSmlLv = 1;
+                    string targetSmlFloor = "max";
+
+                    var sParts = text.Split(new[] { ' ', '_' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (sParts.Length >= 3)
+                    {
+                        int.TryParse(sParts[1], out targetSmlLv);
+                        targetSmlFloor = sParts[2];
+                    }
+                    else if (sParts.Length == 2)
+                    {
+                        int.TryParse(sParts[1], out targetSmlLv);
+                    }
+
+                    targetSmlLv = Math.Clamp(targetSmlLv, 1, 4);
+                    await HandleEnterSmlAsync(token, authorizedChatId, targetSmlSlot, targetSmlLv, targetSmlFloor);
+                    break;
+
                 // --- ALL SLOTS ON / OFF ---
                 case "/allsloton":
                 case "allsloton":
@@ -397,32 +533,388 @@ public class TelegramBotListener
 
     private async Task SendHelpAsync(string token, string chatId)
     {
-        string helpMsg = 
-            "🤖 *GameBotMonitor — Remote Control Commands*\n\n" +
-            "📊 `/status` - Cek status realtime ketiga slot (termasuk status TAB)\n" +
-            "📸 `/ss` - Ambil live screenshot layar PC\n" +
-            "📐 `/tile` - Rapikan susunan 3 jendela game\n" +
-            "▶️ `/start` / ⏹️ `/stop` - Nyalakan/matikan pemantauan bot\n\n" +
-            "🎒 *Cek Tas & Gold:*\n" +
-            "• `/allbag` - Cek tas SEMUA slot (1, 2, 3)\n" +
-            "• `/bag1`, `/bag2`, `/bag3` - Cek tas per slot\n\n" +
-            "🔔 *Monitoring Notifikasi Slot:*\n" +
-            "• `/allsloton` / `/allslotoff` - ON/OFF SEMUA slot\n" +
-            "• `/slot1on` / `/slot1off` - ON/OFF Slot 1\n" +
-            "• `/slot2on` / `/slot2off` - ON/OFF Slot 2\n" +
-            "• `/slot3on` / `/slot3off` - ON/OFF Slot 3\n\n" +
-            "🎯 *Auto Assist TAB:*\n" +
-            "• `/alltabon` / `/alltaboff` - ON/OFF Auto TAB SEMUA slot\n" +
-            "• `/tab1on` / `/tab1off` - ON/OFF Auto TAB Slot 1\n" +
-            "• `/tab2on` / `/tab2off` - ON/OFF Auto TAB Slot 2\n" +
-            "• `/tab3on` / `/tab3off` - ON/OFF Auto TAB Slot 3\n\n" +
-            "🔄 *Ganti Karakter (Remote Switch):*\n" +
-            "• `/char [slot] [nomor]` - Ganti char (contoh: `/char 1 2`)\n" +
-            "• `/char1 [nomor]` - Ganti char Slot 1 (contoh: `/char1 2`)\n" +
-            "• `/char2 [nomor]` - Ganti char Slot 2 (contoh: `/char2 1`)\n" +
-            "• `/char3 [nomor]` - Ganti char Slot 3 (contoh: `/char3 3`)";
+        string helpMsg = GetMainMenuText();
+        var keyboard = CreateMainMenuKeyboard();
+        await TelegramNotifier.SendMessageAsync(token, chatId, helpMsg, keyboard);
+    }
 
-        await TelegramNotifier.SendMessageAsync(token, chatId, helpMsg);
+    private async Task HandleMenuNavigationAsync(string token, string chatId, long messageId, string menuKey)
+    {
+        string text;
+        object keyboard;
+
+        switch (menuKey)
+        {
+            case "menu_bag":
+                text = "🎒 *Menu Pemeriksaan Tas & Gold*\nPilih slot tas yang ingin diperiksa:";
+                keyboard = CreateBagMenuKeyboard();
+                break;
+
+            case "menu_tab":
+                text = "🎯 *Menu Kontrol Auto Assist (Auto TAB)*\nPilih kontrol Auto TAB (per-slot atau serentak):";
+                keyboard = CreateTabMenuKeyboard();
+                break;
+
+            case "menu_sml":
+            case "menu_sml_1":
+                text = "🏰 *Menu Clear SML — Level 1*\nPilih slot & kombinasi lantai SML Level 1:";
+                keyboard = CreateSmlMenuKeyboard(1);
+                break;
+
+            case "menu_sml_2":
+                text = "🏰 *Menu Clear SML — Level 2*\nPilih slot & kombinasi lantai SML Level 2:";
+                keyboard = CreateSmlMenuKeyboard(2);
+                break;
+
+            case "menu_sml_3":
+                text = "🏰 *Menu Clear SML — Level 3*\nPilih slot & kombinasi lantai SML Level 3:";
+                keyboard = CreateSmlMenuKeyboard(3);
+                break;
+
+            case "menu_char":
+                text = "🔄 *Menu Ganti Karakter*\nPilih nomor karakter atau klik Next untuk karakter 4-9:";
+                keyboard = CreateCharMenuKeyboard();
+                break;
+
+            case "menu_char_s1":
+                text = "🔄 *Ganti Karakter — Slot 1 (Karakter Berikutnya)*\nPilih nomor karakter untuk Slot 1:";
+                keyboard = CreateCharNextMenuKeyboard(1);
+                break;
+
+            case "menu_char_s2":
+                text = "🔄 *Ganti Karakter — Slot 2 (Karakter Berikutnya)*\nPilih nomor karakter untuk Slot 2:";
+                keyboard = CreateCharNextMenuKeyboard(2);
+                break;
+
+            case "menu_char_s3":
+                text = "🔄 *Ganti Karakter — Slot 3 (Karakter Berikutnya)*\nPilih nomor karakter untuk Slot 3:";
+                keyboard = CreateCharNextMenuKeyboard(3);
+                break;
+
+            case "menu_main":
+            default:
+                text = GetMainMenuText();
+                keyboard = CreateMainMenuKeyboard();
+                break;
+        }
+
+        if (messageId > 0)
+        {
+            bool edited = await TelegramNotifier.EditMessageTextAsync(token, chatId, messageId, text, keyboard);
+            if (!edited)
+            {
+                await TelegramNotifier.SendMessageAsync(token, chatId, text, keyboard);
+            }
+        }
+        else
+        {
+            await TelegramNotifier.SendMessageAsync(token, chatId, text, keyboard);
+        }
+    }
+
+    private static string GetMainMenuText()
+    {
+        return "🤖 *GameBotMonitor — Remote Control*\n\n" +
+               "Silakan pilih kategori menu kontrol di bawah atau ketik perintah manual:\n\n" +
+               "📊 `/status` - Cek status realtime ketiga slot\n" +
+               "📸 `/ss` - Ambil live screenshot PC\n" +
+               "▶️ `/start` / ⏹️ `/stop` - Nyalakan/matikan monitor\n" +
+               "📐 `/tile` - Rapikan susunan 3 jendela game\n" +
+               "🎒 `/allbag` / `/bag1`-`/bag3` - Cek tas\n" +
+               "🎯 `/alltabon` / `/alltaboff` - Kontrol Auto TAB\n" +
+               "🏰 `sml_1_1_max` - Clear SML (L1, L2, L3)\n" +
+               "🔄 `/char [slot] [nomor]` - Ganti Karakter";
+    }
+
+    private static object CreateMainMenuKeyboard()
+    {
+        return new
+        {
+            inline_keyboard = new object[][]
+            {
+                // Baris 1: Status & Screenshot
+                new object[]
+                {
+                    new { text = "📊 Status Realtime", callback_data = "/status" },
+                    new { text = "📸 Live Screenshot", callback_data = "/ss" }
+                },
+                // Baris 2: Start / Stop Monitor
+                new object[]
+                {
+                    new { text = "▶️ Mulai Monitor", callback_data = "/start" },
+                    new { text = "⏹️ Berhenti Monitor", callback_data = "/stop" }
+                },
+                // Baris 3: Rapikan Jendela & Cek Tas Menu
+                new object[]
+                {
+                    new { text = "📐 Rapikan Jendela", callback_data = "/tile" },
+                    new { text = "🎒 Menu Cek Tas ❯", callback_data = "menu_bag" }
+                },
+                // Baris 4: Auto TAB & Clear SML Menu
+                new object[]
+                {
+                    new { text = "🎯 Menu Auto TAB ❯", callback_data = "menu_tab" },
+                    new { text = "🏰 Menu Clear SML ❯", callback_data = "menu_sml" }
+                },
+                // Baris 5: Ganti Karakter Menu
+                new object[]
+                {
+                    new { text = "🔄 Menu Ganti Karakter ❯", callback_data = "menu_char" }
+                }
+            }
+        };
+    }
+
+    private static object CreateBagMenuKeyboard()
+    {
+        return new
+        {
+            inline_keyboard = new object[][]
+            {
+                // Cek Semua Tas
+                new object[]
+                {
+                    new { text = "🎒 Cek SEMUA Tas (Slot 1, 2, 3)", callback_data = "/allbag" }
+                },
+                // Cek Tas Per Slot
+                new object[]
+                {
+                    new { text = "🎒 Tas Slot 1", callback_data = "/bag1" },
+                    new { text = "🎒 Tas Slot 2", callback_data = "/bag2" },
+                    new { text = "🎒 Tas Slot 3", callback_data = "/bag3" }
+                },
+                // Tombol Back
+                new object[]
+                {
+                    new { text = "🔙 Kembali ke Menu Utama", callback_data = "menu_main" }
+                }
+            }
+        };
+    }
+
+    private static object CreateTabMenuKeyboard()
+    {
+        return new
+        {
+            inline_keyboard = new object[][]
+            {
+                // Serentak All
+                new object[]
+                {
+                    new { text = "🟢 TAB All ON", callback_data = "/alltabon" },
+                    new { text = "⚪ TAB All OFF", callback_data = "/alltaboff" }
+                },
+                // Slot 1
+                new object[]
+                {
+                    new { text = "🟢 TAB Slot 1 ON", callback_data = "/tab1on" },
+                    new { text = "⚪ TAB Slot 1 OFF", callback_data = "/tab1off" }
+                },
+                // Slot 2
+                new object[]
+                {
+                    new { text = "🟢 TAB Slot 2 ON", callback_data = "/tab2on" },
+                    new { text = "⚪ TAB Slot 2 OFF", callback_data = "/tab2off" }
+                },
+                // Slot 3
+                new object[]
+                {
+                    new { text = "🟢 TAB Slot 3 ON", callback_data = "/tab3on" },
+                    new { text = "⚪ TAB Slot 3 OFF", callback_data = "/tab3off" }
+                },
+                // Tombol Back
+                new object[]
+                {
+                    new { text = "🔙 Kembali ke Menu Utama", callback_data = "menu_main" }
+                }
+            }
+        };
+    }
+
+    private static object CreateSmlMenuKeyboard(int level = 1)
+    {
+        if (level == 2)
+        {
+            return new
+            {
+                inline_keyboard = new object[][]
+                {
+                    // Baris 1: S1 L2 90 | S2 L2 90 | S3 L2 90
+                    new object[]
+                    {
+                        new { text = "S1 L2 90", callback_data = "sml_1_2_90" },
+                        new { text = "S2 L2 90", callback_data = "sml_2_2_90" },
+                        new { text = "S3 L2 90", callback_data = "sml_3_2_90" }
+                    },
+                    // Baris 2: S1 L2 -2 | S2 L2 -2 | S3 L2 -2
+                    new object[]
+                    {
+                        new { text = "S1 L2 -2", callback_data = "sml_1_2_-2" },
+                        new { text = "S2 L2 -2", callback_data = "sml_2_2_-2" },
+                        new { text = "S3 L2 -2", callback_data = "sml_3_2_-2" }
+                    },
+                    // Baris 3: S1 L2 -5 | S2 L2 -5 | S3 L2 -5
+                    new object[]
+                    {
+                        new { text = "S1 L2 -5", callback_data = "sml_1_2_-5" },
+                        new { text = "S2 L2 -5", callback_data = "sml_2_2_-5" },
+                        new { text = "S3 L2 -5", callback_data = "sml_3_2_-5" }
+                    },
+                    // Baris 4: Prev Lvl & Next Lvl
+                    new object[]
+                    {
+                        new { text = "❮ Prev Lvl", callback_data = "menu_sml_1" },
+                        new { text = "Next Lvl ❯", callback_data = "menu_sml_3" }
+                    },
+                    // Baris 5: Back to Main
+                    new object[]
+                    {
+                        new { text = "🔙 Kembali ke Menu Utama", callback_data = "menu_main" }
+                    }
+                }
+            };
+        }
+        else if (level == 3)
+        {
+            return new
+            {
+                inline_keyboard = new object[][]
+                {
+                    // Baris 1: S1 L3 Max | S2 L3 Max | S3 L3 Max
+                    new object[]
+                    {
+                        new { text = "S1 L3 Max", callback_data = "sml_1_3_max" },
+                        new { text = "S2 L3 Max", callback_data = "sml_2_3_max" },
+                        new { text = "S3 L3 Max", callback_data = "sml_3_3_max" }
+                    },
+                    // Baris 2: S1 L3 -2 | S2 L3 -2 | S3 L3 -2
+                    new object[]
+                    {
+                        new { text = "S1 L3 -2", callback_data = "sml_1_3_-2" },
+                        new { text = "S2 L3 -2", callback_data = "sml_2_3_-2" },
+                        new { text = "S3 L3 -2", callback_data = "sml_3_3_-2" }
+                    },
+                    // Baris 3: S1 L3 -5 | S2 L3 -5 | S3 L3 -5
+                    new object[]
+                    {
+                        new { text = "S1 L3 -5", callback_data = "sml_1_3_-5" },
+                        new { text = "S2 L3 -5", callback_data = "sml_2_3_-5" },
+                        new { text = "S3 L3 -5", callback_data = "sml_3_3_-5" }
+                    },
+                    // Baris 4: Prev Lvl & Back to Main
+                    new object[]
+                    {
+                        new { text = "❮ Prev Lvl", callback_data = "menu_sml_2" },
+                        new { text = "🔙 Kembali ke Menu Utama", callback_data = "menu_main" }
+                    }
+                }
+            };
+        }
+        else // Level 1 (Default)
+        {
+            return new
+            {
+                inline_keyboard = new object[][]
+                {
+                    // Baris 1: S1 L1 Max | S2 L1 Max | S3 L1 Max
+                    new object[]
+                    {
+                        new { text = "S1 L1 Max", callback_data = "sml_1_1_max" },
+                        new { text = "S2 L1 Max", callback_data = "sml_2_1_max" },
+                        new { text = "S3 L1 Max", callback_data = "sml_3_1_max" }
+                    },
+                    // Baris 2: S1 L1 -2 | S2 L1 -2 | S3 L1 -2
+                    new object[]
+                    {
+                        new { text = "S1 L1 -2", callback_data = "sml_1_1_-2" },
+                        new { text = "S2 L1 -2", callback_data = "sml_2_1_-2" },
+                        new { text = "S3 L1 -2", callback_data = "sml_3_1_-2" }
+                    },
+                    // Baris 3: S1 L1 -5 | S2 L1 -5 | S3 L1 -5
+                    new object[]
+                    {
+                        new { text = "S1 L1 -5", callback_data = "sml_1_1_-5" },
+                        new { text = "S2 L1 -5", callback_data = "sml_2_1_-5" },
+                        new { text = "S3 L1 -5", callback_data = "sml_3_1_-5" }
+                    },
+                    // Baris 4: Back to Main & Next Lvl
+                    new object[]
+                    {
+                        new { text = "🔙 Menu Utama", callback_data = "menu_main" },
+                        new { text = "Next Lvl ❯", callback_data = "menu_sml_2" }
+                    }
+                }
+            };
+        }
+    }
+
+    private static object CreateCharMenuKeyboard()
+    {
+        return new
+        {
+            inline_keyboard = new object[][]
+            {
+                // Slot 1: S1 Char 1 | S1 Char 2 | S1 Char 3 | S1 Next
+                new object[]
+                {
+                    new { text = "S1 Char 1", callback_data = "/char1 1" },
+                    new { text = "S1 Char 2", callback_data = "/char1 2" },
+                    new { text = "S1 Char 3", callback_data = "/char1 3" },
+                    new { text = "S1 Next ❯", callback_data = "menu_char_s1" }
+                },
+                // Slot 2: S2 Char 1 | S2 Char 2 | S2 Char 3 | S2 Next
+                new object[]
+                {
+                    new { text = "S2 Char 1", callback_data = "/char2 1" },
+                    new { text = "S2 Char 2", callback_data = "/char2 2" },
+                    new { text = "S2 Char 3", callback_data = "/char2 3" },
+                    new { text = "S2 Next ❯", callback_data = "menu_char_s2" }
+                },
+                // Slot 3: S3 Char 1 | S3 Char 2 | S3 Char 3 | S3 Next
+                new object[]
+                {
+                    new { text = "S3 Char 1", callback_data = "/char3 1" },
+                    new { text = "S3 Char 2", callback_data = "/char3 2" },
+                    new { text = "S3 Char 3", callback_data = "/char3 3" },
+                    new { text = "S3 Next ❯", callback_data = "menu_char_s3" }
+                },
+                // Tombol Back
+                new object[]
+                {
+                    new { text = "🔙 Kembali ke Menu Utama", callback_data = "menu_main" }
+                }
+            }
+        };
+    }
+
+    private static object CreateCharNextMenuKeyboard(int slot)
+    {
+        return new
+        {
+            inline_keyboard = new object[][]
+            {
+                // Baris 1: Char 4, 5, 6
+                new object[]
+                {
+                    new { text = $"S{slot} Char 4", callback_data = $"/char{slot} 4" },
+                    new { text = $"S{slot} Char 5", callback_data = $"/char{slot} 5" },
+                    new { text = $"S{slot} Char 6", callback_data = $"/char{slot} 6" }
+                },
+                // Baris 2: Char 7, 8, 9
+                new object[]
+                {
+                    new { text = $"S{slot} Char 7", callback_data = $"/char{slot} 7" },
+                    new { text = $"S{slot} Char 8", callback_data = $"/char{slot} 8" },
+                    new { text = $"S{slot} Char 9", callback_data = $"/char{slot} 9" }
+                },
+                // Navigasi: Back to Char Menu & Back to Main
+                new object[]
+                {
+                    new { text = "❮ Menu Karakter", callback_data = "menu_char" },
+                    new { text = "🔙 Menu Utama", callback_data = "menu_main" }
+                }
+            }
+        };
     }
 
     private async Task HandleStatusAsync(string token, string chatId)
@@ -603,6 +1095,33 @@ public class TelegramBotListener
         else
         {
             await TelegramNotifier.SendMessageAsync(token, chatId, "⚠️ Handler Ganti Karakter belum siap.");
+        }
+    }
+
+    private async Task HandleEnterSmlAsync(string token, string chatId, int slotNum, int smlLevel, string floorTarget)
+    {
+        await TelegramNotifier.SendMessageAsync(
+            token,
+            chatId,
+            $"🏰 Memulai proses *Clear SML* untuk *Slot {slotNum}*...\n" +
+            $"⭐ Level: {smlLevel} | 🚪 Target: {floorTarget}\n" +
+            $"Mohon tunggu proses navigasi & loading in-dungeon...");
+
+        if (OnEnterSml != null)
+        {
+            var (success, imagePath, message) = await OnEnterSml.Invoke(slotNum, smlLevel, floorTarget);
+            if (success && !string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+            {
+                await TelegramNotifier.SendPhotoDirectAsync(token, chatId, imagePath, message);
+            }
+            else
+            {
+                await TelegramNotifier.SendMessageAsync(token, chatId, message);
+            }
+        }
+        else
+        {
+            await TelegramNotifier.SendMessageAsync(token, chatId, "⚠️ Handler Clear SML belum siap.");
         }
     }
 }

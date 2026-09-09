@@ -7,5 +7,6 @@ public enum ClientStatus
     LowHp,          // HP kritis
     Dead,           // Karakter mati (Darah 0)
     Crashed,        // Proses game tertutup / crash
-    NotResponding   // Jendela game freeze / tidak merespons
+    NotResponding,  // Jendela game freeze / tidak merespons
+    Switching       // Sedang dalam proses pergantian karakter
 }

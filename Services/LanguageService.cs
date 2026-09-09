@@ -36,6 +36,7 @@ public static class LanguageService
             ["BadgeCrashed"] = "\u25B2 CLIENT CRASH / CLOSED",
             ["BadgeNotResponding"] = "\u23F3 NOT RESPONDING",
             ["BadgeOffline"] = "\u25CB OFFLINE",
+            ["BadgeSwitching"] = "\u21BB GANTI KARAKTER...",
 
             // Tabs
             ["TabLogs"] = "Log Aktivitas",
@@ -189,6 +190,7 @@ public static class LanguageService
             ["BadgeCrashed"] = "\u25B2 CLIENT CRASH / CLOSED",
             ["BadgeNotResponding"] = "\u23F3 NOT RESPONDING",
             ["BadgeOffline"] = "\u25CB OFFLINE",
+            ["BadgeSwitching"] = "\u21BB SWITCHING CHAR...",
 
             // Tabs
             ["TabLogs"] = "Activity Logs",

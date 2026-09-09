@@ -169,8 +169,12 @@ public static class Win32
     public const uint KEYEVENTF_SCANCODE = 0x0008;
     public const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
     public const uint MOUSEEVENTF_LEFTUP = 0x0004;
+    public const uint MOUSEEVENTF_WHEEL = 0x0800;
+    public const int WHEEL_DELTA = 120;
     public const uint WM_CHAR = 0x0102;
     public const ushort SCANCODE_ESC = 0x01;
+    public const ushort SCANCODE_COMMA = 0x33; // DirectX ScanCode untuk tombol koma ','
+    public const ushort SCANCODE_TAB = 0x0F;
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]

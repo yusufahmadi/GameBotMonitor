@@ -19,6 +19,39 @@ public class AppConfig
     public StorageConfig Storage { get; set; } = new();
     public AutoTabConfig AutoTab { get; set; } = new();
     public CharacterSwitchConfig CharSwitch { get; set; } = new();
+    public SmlConfig Sml { get; set; } = new();
+}
+
+public class SmlConfig
+{
+    public string DungeonHotkey { get; set; } = ","; // Tombol default keyboard untuk buka Dungeon Management
+    public ushort DungeonScanCode { get; set; } = 0x33; // Scan code DirectX untuk ','
+
+    // Tab Sprite Magic Land (Tab ke-2 di header)
+    public double TabSmlPercentX { get; set; } = 48.5;
+    public double TabSmlPercentY { get; set; } = 39.5;
+
+    // Card Pilihan Level SML di panel kiri (Lv 1, 2, 3, 4)
+    public double Level1PercentX { get; set; } = 46.5;
+    public double Level1PercentY { get; set; } = 44.0;
+    public double Level2PercentX { get; set; } = 46.5;
+    public double Level2PercentY { get; set; } = 49.0;
+    public double Level3PercentX { get; set; } = 46.5;
+    public double Level3PercentY { get; set; } = 54.0;
+    public double Level4PercentX { get; set; } = 46.5;
+    public double Level4PercentY { get; set; } = 59.0;
+
+    // Titik Tengah Menara (Area scroll mouse wheel)
+    public double TowerCenterPercentX { get; set; } = 61.5;
+    public double TowerCenterPercentY { get; set; } = 58.0;
+
+    // Posisi Gerbang Lantai Aktif di Menara (untuk di-klik)
+    public double GatePercentX { get; set; } = 61.5;
+    public double GatePercentY { get; set; } = 52.0;
+
+    // Tombol 'Enter the...' di pojok kanan bawah panel SML
+    public double EnterButtonPercentX { get; set; } = 86.5;
+    public double EnterButtonPercentY { get; set; } = 73.5;
 }
 
 public class CharacterSwitchConfig

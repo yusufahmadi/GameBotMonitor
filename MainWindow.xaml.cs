@@ -13,6 +13,7 @@ public partial class MainWindow : Window
 {
     private AppConfig _config;
     private readonly DispatcherTimer _scanTimer;
+    private readonly DispatcherTimer _hudRefreshTimer;  // Timer HUD refresh independen (tidak terpengaruh scan timer)
     private readonly SoundAlertService _soundService = new();
     private StorageCleanupService _storageService;
     private readonly TelegramBotListener _telegramListener = new();
@@ -60,6 +61,13 @@ public partial class MainWindow : Window
         };
         _scanTimer.Tick += ScanTimer_Tick;
 
+        // Timer refresh HUD background kartu slot — independen dari scan, selalu jalan jika ShowHudBackground aktif
+        _hudRefreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(3)
+        };
+        _hudRefreshTimer.Tick += HudRefreshTimer_Tick;
+
         // Inisialisasi bahasa dari config
         LanguageService.CurrentLanguage = _config.Language ?? "id";
 
@@ -70,6 +78,12 @@ public partial class MainWindow : Window
         LoadConfigToUi();
         ApplyLanguage();
         UpdateSlotUi();
+
+        // Start HUD refresh timer jika ShowHudBackground aktif dari config
+        if (_config.ShowHudBackground)
+        {
+            _hudRefreshTimer.Start();
+        }
 
         // Inisialisasi Telegram Remote Control (2-Way)
         InitTelegramListener();
@@ -196,9 +210,6 @@ public partial class MainWindow : Window
         TxtSlot1Title.Text = LanguageService.Get("Slot1Title");
         TxtSlot2Title.Text = LanguageService.Get("Slot2Title");
         TxtSlot3Title.Text = LanguageService.Get("Slot3Title");
-        TxtHpSample1.Text = LanguageService.Get("HpColorSample");
-        TxtHpSample2.Text = LanguageService.Get("HpColorSample");
-        TxtHpSample3.Text = LanguageService.Get("HpColorSample");
 
         // Refresh slot status & badges
         foreach (var slot in _slots)
@@ -538,22 +549,44 @@ public partial class MainWindow : Window
         TxtPagePrevPercentY.Text = _config.CharSwitch.PagePrevPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
         TxtPageNextPercentX.Text = _config.CharSwitch.PageNextPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
         TxtPageNextPercentY.Text = _config.CharSwitch.PageNextPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+        // Clear SML (Sprite Magic Land)
+        TxtSmlHotkey.Text = _config.Sml.DungeonHotkey ?? ",";
+        TxtTabSmlPercentX.Text = _config.Sml.TabSmlPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtTabSmlPercentY.Text = _config.Sml.TabSmlPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+        TxtSmlLv1PercentX.Text = _config.Sml.Level1PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlLv1PercentY.Text = _config.Sml.Level1PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlLv2PercentX.Text = _config.Sml.Level2PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlLv2PercentY.Text = _config.Sml.Level2PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlLv3PercentX.Text = _config.Sml.Level3PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlLv3PercentY.Text = _config.Sml.Level3PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlLv4PercentX.Text = _config.Sml.Level4PercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlLv4PercentY.Text = _config.Sml.Level4PercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+        TxtSmlTowerPercentX.Text = _config.Sml.TowerCenterPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlTowerPercentY.Text = _config.Sml.TowerCenterPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+        TxtSmlGatePercentX.Text = _config.Sml.GatePercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlGatePercentY.Text = _config.Sml.GatePercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+        TxtSmlEnterPercentX.Text = _config.Sml.EnterButtonPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        TxtSmlEnterPercentY.Text = _config.Sml.EnterButtonPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     private void UpdateSlotUi()
     {
         // Slot 1
-        UpdateCard(_slots[0], TxtPid1, TxtTitle1, TxtHpSample1, BadgeBorder1, BadgeText1, ColorSwatch1, TxtHex1, TxtInfo1, ImgCardBg1, OverlayCardBg1);
+        UpdateCard(_slots[0], TxtPid1, TxtTitle1, BadgeBorder1, BadgeText1, ColorSwatch1, TxtHex1, TxtInfo1, ImgCardBg1, OverlayCardBg1);
         // Slot 2
-        UpdateCard(_slots[1], TxtPid2, TxtTitle2, TxtHpSample2, BadgeBorder2, BadgeText2, ColorSwatch2, TxtHex2, TxtInfo2, ImgCardBg2, OverlayCardBg2);
+        UpdateCard(_slots[1], TxtPid2, TxtTitle2, BadgeBorder2, BadgeText2, ColorSwatch2, TxtHex2, TxtInfo2, ImgCardBg2, OverlayCardBg2);
         // Slot 3
-        UpdateCard(_slots[2], TxtPid3, TxtTitle3, TxtHpSample3, BadgeBorder3, BadgeText3, ColorSwatch3, TxtHex3, TxtInfo3, ImgCardBg3, OverlayCardBg3);
+        UpdateCard(_slots[2], TxtPid3, TxtTitle3, BadgeBorder3, BadgeText3, ColorSwatch3, TxtHex3, TxtInfo3, ImgCardBg3, OverlayCardBg3);
     }
 
     private void UpdateCard(ClientSlot slot,
         System.Windows.Controls.TextBlock txtPid,
         System.Windows.Controls.TextBlock txtTitle,
-        System.Windows.Controls.TextBlock txtHpSample,
         System.Windows.Controls.Border badgeBorder,
         System.Windows.Controls.TextBlock badgeText,
         System.Windows.Controls.Border colorSwatch,
@@ -580,7 +613,7 @@ public partial class MainWindow : Window
         txtHex.Text = slot.HealthColorHex;
         txtInfo.Text = slot.LastInfo;
 
-        // Tampilan Background HUD Karakter (Opsional)
+        // Tampilan Background HUD Karakter (Opsional — initial load; refresh rutin ditangani oleh _hudRefreshTimer)
         if (_config.ShowHudBackground && slot.Status != ClientStatus.Offline && slot.WindowHandle != 0)
         {
             try
@@ -615,8 +648,8 @@ public partial class MainWindow : Window
             txtTitle.Foreground = BrushTitleBright;
             txtTitle.FontWeight = FontWeights.SemiBold;
 
-            txtHpSample.Foreground = BrushHpSampleBright;
-            txtHpSample.FontWeight = FontWeights.SemiBold;
+            txtHex.Foreground = BrushHpSampleBright;
+            txtHex.FontWeight = FontWeights.SemiBold;
         }
         else
         {
@@ -626,8 +659,56 @@ public partial class MainWindow : Window
             txtTitle.Foreground = BrushTitleDefault;
             txtTitle.FontWeight = FontWeights.Normal;
 
-            txtHpSample.Foreground = BrushHpSampleDefault;
-            txtHpSample.FontWeight = FontWeights.Normal;
+            txtHex.Foreground = new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromRgb(0xCD, 0xD6, 0xF4)); // #CDD6F4 default
+            txtHex.FontWeight = FontWeights.SemiBold;
+        }
+    }
+
+    /// <summary>
+    /// Timer HUD Refresh — hanya memperbarui gambar background kartu slot (bukan full scan HP).
+    /// Berjalan setiap 3 detik, independen dari scan timer, sehingga tetap update meski scan di-pause.
+    /// </summary>
+    private void HudRefreshTimer_Tick(object? sender, EventArgs e)
+    {
+        if (!_config.ShowHudBackground) return;
+
+        RefreshHudBackground(ImgCardBg1, OverlayCardBg1, _slots[0]);
+        RefreshHudBackground(ImgCardBg2, OverlayCardBg2, _slots[1]);
+        RefreshHudBackground(ImgCardBg3, OverlayCardBg3, _slots[2]);
+    }
+
+    private void RefreshHudBackground(
+        System.Windows.Controls.Image imgCardBg,
+        System.Windows.Controls.Border overlayCardBg,
+        ClientSlot slot)
+    {
+        if (slot.Status == ClientStatus.Offline || slot.WindowHandle == 0)
+        {
+            imgCardBg.Source = null;
+            imgCardBg.Visibility = Visibility.Collapsed;
+            overlayCardBg.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        try
+        {
+            using var bmp = PixelHealthScanner.CaptureWindow(
+                slot.WindowHandle, true,
+                _config.Storage.CropWidth,
+                _config.Storage.CropHeight);
+
+            if (bmp != null)
+            {
+                imgCardBg.Source = BitmapToBitmapSource(bmp);
+                imgCardBg.Visibility = Visibility.Visible;
+                overlayCardBg.Visibility = Visibility.Visible;
+            }
+        }
+        catch
+        {
+            imgCardBg.Visibility = Visibility.Collapsed;
+            overlayCardBg.Visibility = Visibility.Collapsed;
         }
     }
 
@@ -950,6 +1031,181 @@ public partial class MainWindow : Window
         }
     }
 
+    // ===================== KALIBRASI SPRITE MAGIC LAND (SML) =====================
+
+    private void BtnCalibrateTabSml_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Buka Dungeon Management, lalu KLIK 1 KALI tepat di Tab 'Sprite Magic Land'.",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.Sml.TabSmlPercentX = Math.Round(overlay.PercentX, 1);
+            _config.Sml.TabSmlPercentY = Math.Round(overlay.PercentY, 1);
+            TxtTabSmlPercentX.Text = _config.Sml.TabSmlPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtTabSmlPercentY.Text = _config.Sml.TabSmlPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Tab SML disimpan: {_config.Sml.TabSmlPercentX:F1}% X, {_config.Sml.TabSmlPercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Tab SML Berhasil!\n\nPosisi: {_config.Sml.TabSmlPercentX:F1}% X, {_config.Sml.TabSmlPercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Tab SML", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateSmlTower_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di tab SML, KLIK 1 KALI tepat di area TENGAH MENARA (posisi kursor untuk scroll mouse wheel).",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.Sml.TowerCenterPercentX = Math.Round(overlay.PercentX, 1);
+            _config.Sml.TowerCenterPercentY = Math.Round(overlay.PercentY, 1);
+            TxtSmlTowerPercentX.Text = _config.Sml.TowerCenterPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtSmlTowerPercentY.Text = _config.Sml.TowerCenterPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Area Menara SML disimpan: {_config.Sml.TowerCenterPercentX:F1}% X, {_config.Sml.TowerCenterPercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Area Menara Berhasil!\n\nPosisi: {_config.Sml.TowerCenterPercentX:F1}% X, {_config.Sml.TowerCenterPercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Menara SML", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateSmlEnter_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di tab SML, KLIK 1 KALI tepat di tombol 'Enter the...' (kanan bawah).",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.Sml.EnterButtonPercentX = Math.Round(overlay.PercentX, 1);
+            _config.Sml.EnterButtonPercentY = Math.Round(overlay.PercentY, 1);
+            TxtSmlEnterPercentX.Text = _config.Sml.EnterButtonPercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtSmlEnterPercentY.Text = _config.Sml.EnterButtonPercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Tombol Enter SML disimpan: {_config.Sml.EnterButtonPercentX:F1}% X, {_config.Sml.EnterButtonPercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Tombol Enter Berhasil!\n\nPosisi: {_config.Sml.EnterButtonPercentX:F1}% X, {_config.Sml.EnterButtonPercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Enter SML", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateSmlLv1_Click(object sender, RoutedEventArgs e) => CalibrateSmlLevel(1);
+    private void BtnCalibrateSmlLv2_Click(object sender, RoutedEventArgs e) => CalibrateSmlLevel(2);
+    private void BtnCalibrateSmlLv3_Click(object sender, RoutedEventArgs e) => CalibrateSmlLevel(3);
+    private void BtnCalibrateSmlLv4_Click(object sender, RoutedEventArgs e) => CalibrateSmlLevel(4);
+
+    private void CalibrateSmlLevel(int level)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            $"Di tab SML, KLIK 1 KALI tepat di Card SML Level {level} di panel sebelah kiri.",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            double px = Math.Round(overlay.PercentX, 1);
+            double py = Math.Round(overlay.PercentY, 1);
+
+            switch (level)
+            {
+                case 1:
+                    _config.Sml.Level1PercentX = px;
+                    _config.Sml.Level1PercentY = py;
+                    TxtSmlLv1PercentX.Text = px.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    TxtSmlLv1PercentY.Text = py.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    break;
+                case 2:
+                    _config.Sml.Level2PercentX = px;
+                    _config.Sml.Level2PercentY = py;
+                    TxtSmlLv2PercentX.Text = px.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    TxtSmlLv2PercentY.Text = py.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    break;
+                case 3:
+                    _config.Sml.Level3PercentX = px;
+                    _config.Sml.Level3PercentY = py;
+                    TxtSmlLv3PercentX.Text = px.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    TxtSmlLv3PercentY.Text = py.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    break;
+                default:
+                    _config.Sml.Level4PercentX = px;
+                    _config.Sml.Level4PercentY = py;
+                    TxtSmlLv4PercentX.Text = px.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    TxtSmlLv4PercentY.Text = py.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                    break;
+            }
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi SML Level {level} disimpan: {px:F1}% X, {py:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi SML Level {level} Berhasil!\n\nPosisi: {px:F1}% X, {py:F1}% Y\nPengaturan disimpan otomatis.", $"Sukses Kalibrasi SML Level {level}", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnCalibrateSmlGate_Click(object sender, RoutedEventArgs e)
+    {
+        var overlay = new CalibrationOverlay(
+            _config.TargetWindowTitle,
+            _config.GameName,
+            "Di tab SML, KLIK 1 KALI tepat di GERBANG LANTAI AKTIF di menara tengah.",
+            showDefaultSuccessDialog: false);
+        overlay.ShowDialog();
+
+        if (overlay.IsSuccess)
+        {
+            _config.Sml.GatePercentX = Math.Round(overlay.PercentX, 1);
+            _config.Sml.GatePercentY = Math.Round(overlay.PercentY, 1);
+            TxtSmlGatePercentX.Text = _config.Sml.GatePercentX.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            TxtSmlGatePercentY.Text = _config.Sml.GatePercentY.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+            ConfigService.Save(_config);
+            AddLog($"[INFO] Kalibrasi Gerbang Lantai SML disimpan: {_config.Sml.GatePercentX:F1}% X, {_config.Sml.GatePercentY:F1}% Y");
+            WpfMessageBox.Show($"Kalibrasi Gerbang Lantai Berhasil!\n\nPosisi: {_config.Sml.GatePercentX:F1}% X, {_config.Sml.GatePercentY:F1}% Y\nPengaturan disimpan otomatis.", "Sukses Kalibrasi Gerbang SML", WpfMessageBoxButton.OK, WpfMessageBoxImage.Information);
+        }
+    }
+
+    private void BtnShowSmlCalibrationOverlay_Click(object sender, RoutedEventArgs e)
+    {
+        int slotNum = (CmbPreviewSlotSml.SelectedIndex >= 0 ? CmbPreviewSlotSml.SelectedIndex : 0) + 1;
+        var viewer = new CalibrationViewerOverlay(_config, _config.TargetWindowTitle, "sml", slotNum);
+        viewer.ShowDialog();
+    }
+
+    private void BtnShowCharCalibrationOverlay_Click(object sender, RoutedEventArgs e)
+    {
+        int slotNum = (CmbPreviewSlotChar.SelectedIndex >= 0 ? CmbPreviewSlotChar.SelectedIndex : 0) + 1;
+        var viewer = new CalibrationViewerOverlay(_config, _config.TargetWindowTitle, "charswitch", slotNum);
+        viewer.ShowDialog();
+    }
+
+    private void BtnPreviewSmlSlot_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not WpfButton btn) return;
+        if (!int.TryParse(btn.Tag?.ToString(), out int slotNum)) slotNum = 1;
+
+        var viewer = new CalibrationViewerOverlay(_config, _config.TargetWindowTitle, "sml", slotNum);
+        viewer.ShowDialog();
+    }
+
+    private void BtnPreviewCharSlot_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not WpfButton btn) return;
+        if (!int.TryParse(btn.Tag?.ToString(), out int slotNum)) slotNum = 1;
+
+        var viewer = new CalibrationViewerOverlay(_config, _config.TargetWindowTitle, "charswitch", slotNum);
+        viewer.ShowDialog();
+    }
+
     private void BtnTestTabSlot_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not WpfButton btn) return;
@@ -1121,11 +1377,42 @@ public partial class MainWindow : Window
             _config.CharSwitch.PageNextPercentX = double.TryParse(TxtPageNextPercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var pnx) ? pnx : 84.4;
             _config.CharSwitch.PageNextPercentY = double.TryParse(TxtPageNextPercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var pny) ? pny : 77.2;
 
+            // Clear SML (Sprite Magic Land)
+            _config.Sml.DungeonHotkey = string.IsNullOrWhiteSpace(TxtSmlHotkey.Text) ? "," : TxtSmlHotkey.Text.Trim();
+            _config.Sml.DungeonScanCode = Native.Win32.SCANCODE_COMMA;
+
+            _config.Sml.TabSmlPercentX = double.TryParse(TxtTabSmlPercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var tsx) ? tsx : 48.5;
+            _config.Sml.TabSmlPercentY = double.TryParse(TxtTabSmlPercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var tsy) ? tsy : 39.5;
+
+            _config.Sml.Level1PercentX = double.TryParse(TxtSmlLv1PercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l1x) ? l1x : 46.5;
+            _config.Sml.Level1PercentY = double.TryParse(TxtSmlLv1PercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l1y) ? l1y : 44.0;
+            _config.Sml.Level2PercentX = double.TryParse(TxtSmlLv2PercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l2x) ? l2x : 46.5;
+            _config.Sml.Level2PercentY = double.TryParse(TxtSmlLv2PercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l2y) ? l2y : 49.0;
+            _config.Sml.Level3PercentX = double.TryParse(TxtSmlLv3PercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l3x) ? l3x : 46.5;
+            _config.Sml.Level3PercentY = double.TryParse(TxtSmlLv3PercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l3y) ? l3y : 54.0;
+            _config.Sml.Level4PercentX = double.TryParse(TxtSmlLv4PercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l4x) ? l4x : 46.5;
+            _config.Sml.Level4PercentY = double.TryParse(TxtSmlLv4PercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l4y) ? l4y : 59.0;
+
+            _config.Sml.TowerCenterPercentX = double.TryParse(TxtSmlTowerPercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var twx) ? twx : 61.5;
+            _config.Sml.TowerCenterPercentY = double.TryParse(TxtSmlTowerPercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var twy) ? twy : 58.0;
+
+            _config.Sml.GatePercentX = double.TryParse(TxtSmlGatePercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var gtx) ? gtx : 61.5;
+            _config.Sml.GatePercentY = double.TryParse(TxtSmlGatePercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var gty) ? gty : 52.0;
+
+            _config.Sml.EnterButtonPercentX = double.TryParse(TxtSmlEnterPercentX.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var ebx) ? ebx : 86.5;
+            _config.Sml.EnterButtonPercentY = double.TryParse(TxtSmlEnterPercentY.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var eby) ? eby : 73.5;
+
             ConfigService.Save(_config);
             _scanTimer.Interval = TimeSpan.FromMilliseconds(_config.ScanIntervalMs);
             _storageService = new StorageCleanupService(_config.Storage.BaseFolder, _config.Storage.MaxDaysRetention, _config.Storage.MaxScreenshotsPerDay);
             ApplyLanguage();
             UpdateSlotUi();
+
+            // Sinkronisasi HUD refresh timer dengan setting ShowHudBackground terbaru
+            if (_config.ShowHudBackground)
+                _hudRefreshTimer.Start();
+            else
+                _hudRefreshTimer.Stop();
 
             // Restart Telegram Listener dengan konfigurasi terbaru
             _telegramListener.Stop();
@@ -1149,6 +1436,18 @@ public partial class MainWindow : Window
     private void ChkShowHudBackground_Click(object sender, RoutedEventArgs e)
     {
         _config.ShowHudBackground = ChkShowHudBackground.IsChecked ?? false;
+
+        if (_config.ShowHudBackground)
+        {
+            _hudRefreshTimer.Start();
+            // Langsung refresh sekali supaya gambar langsung muncul tanpa menunggu 3 detik
+            HudRefreshTimer_Tick(null, EventArgs.Empty);
+        }
+        else
+        {
+            _hudRefreshTimer.Stop();
+        }
+
         UpdateSlotUi();
     }
 
@@ -1178,8 +1477,71 @@ public partial class MainWindow : Window
         {
             BtnRunTestCommand.IsEnabled = false;
 
+            // Handle SML command: sml_1_1_max, sml_1_1_90, sml_1_1_-2, sml 1 1 max, sml1 1 max, clearsml, dll.
+            if (cmd.StartsWith("sml") || cmd.StartsWith("clearsml"))
+            {
+                int slot = 1;
+                int smlLv = 1;
+                string floorTarget = "max";
+
+                var smlParts = clean.Split(new[] { ' ', '_' }, StringSplitOptions.RemoveEmptyEntries);
+                if (smlParts.Length >= 4)
+                {
+                    int.TryParse(smlParts[1], out slot);
+                    int.TryParse(smlParts[2], out smlLv);
+                    floorTarget = smlParts[3];
+                }
+                else if (smlParts.Length == 3)
+                {
+                    if (smlParts[0].Length >= 4 && int.TryParse(smlParts[0].Substring(3, 1), out int sDigit))
+                    {
+                        slot = sDigit;
+                        int.TryParse(smlParts[1], out smlLv);
+                        floorTarget = smlParts[2];
+                    }
+                    else
+                    {
+                        int.TryParse(smlParts[1], out slot);
+                        int.TryParse(smlParts[2], out smlLv);
+                    }
+                }
+                else if (smlParts.Length == 2)
+                {
+                    if (smlParts[0].Length >= 4 && int.TryParse(smlParts[0].Substring(3, 1), out int sDigit))
+                    {
+                        slot = sDigit;
+                        int.TryParse(smlParts[1], out smlLv);
+                    }
+                    else
+                    {
+                        int.TryParse(smlParts[1], out smlLv);
+                    }
+                }
+
+                slot = Math.Clamp(slot, 1, 3);
+                smlLv = Math.Clamp(smlLv, 1, 4);
+
+                // Validasi slot aktif sebelum eksekusi
+                var targetSlotEntry = _slots[slot - 1];
+                if (targetSlotEntry.WindowHandle == 0 || targetSlotEntry.Status == ClientStatus.Offline)
+                {
+                    AddLog($"[WARN] ❌ Slot {slot} offline / jendela game tidak terdeteksi. Buka game terlebih dahulu.");
+                    return;
+                }
+
+                if (_telegramListener.OnEnterSml != null)
+                {
+                    var (success, imagePath, msg) = await _telegramListener.OnEnterSml.Invoke(slot, smlLv, floorTarget);
+                    AddLog($"[TEST-RESULT] Masuk SML Slot {slot} Lv {smlLv} Floor {floorTarget}: {(success ? "SUKSES" : "GAGAL")}");
+                    if (!string.IsNullOrEmpty(msg)) AddLog($"[INFO] {msg}");
+                }
+                else
+                {
+                    AddLog("[ERROR] Handler OnEnterSml belum siap.");
+                }
+            }
             // Handle char switch: char2 1, char1 2, gantichar 1 2, char1, etc.
-            if (cmd.StartsWith("char") || cmd.StartsWith("gantichar") || (cmd.StartsWith("c") && char.IsDigit(cmd.Length > 1 ? cmd[1] : 'x')))
+            else if (cmd.StartsWith("char") || cmd.StartsWith("gantichar") || (cmd.StartsWith("c") && char.IsDigit(cmd.Length > 1 ? cmd[1] : 'x')))
             {
                 int slot = 1;
                 int charNum = 1;
@@ -1209,6 +1571,14 @@ public partial class MainWindow : Window
 
                 slot = Math.Clamp(slot, 1, 3);
                 charNum = Math.Clamp(charNum, 1, 9);
+
+                // Validasi slot aktif sebelum eksekusi
+                var targetSlotChar = _slots[slot - 1];
+                if (targetSlotChar.WindowHandle == 0 || targetSlotChar.Status == ClientStatus.Offline)
+                {
+                    AddLog($"[WARN] ❌ Slot {slot} offline / jendela game tidak terdeteksi. Buka game terlebih dahulu.");
+                    return;
+                }
 
                 if (_telegramListener.OnSwitchCharacter != null)
                 {
@@ -1347,6 +1717,12 @@ public partial class MainWindow : Window
                 slot.ProcessId = win.ProcessId;
                 slot.WindowTitle = win.Title;
 
+                // Skip full scan saat slot sedang dalam proses ganti karakter
+                if (slot.Status == ClientStatus.Switching)
+                {
+                    continue;
+                }
+
                 if (!win.IsResponding)
                 {
                     slot.Status = ClientStatus.NotResponding;
@@ -1365,7 +1741,7 @@ public partial class MainWindow : Window
                     bool wasNotAlive = (slot.Status != ClientStatus.Alive);
                     slot.DeadSince = null;
                     slot.Status = ClientStatus.Alive;
-                    slot.LastInfo = $"{LanguageService.Get("HpNormal")} ({hex})";
+                    slot.LastInfo = $"{LanguageService.Get("HpNormal")} ({hex}) — {DateTime.Now:HH:mm:ss}";
 
                     if (wasNotAlive)
                     {
@@ -1704,6 +2080,12 @@ public partial class MainWindow : Window
                     AddLog($"[REMOTE] Auto TAB Slot {slotNum} di-pause sementara untuk pergantian karakter.");
                 }
 
+                // Set status SWITCHING agar badge di kartu slot berubah menjadi ungu
+                var previousStatus = slot.Status;
+                slot.Status = ClientStatus.Switching;
+                slot.LastInfo = $"⟳ Proses ganti karakter ke nomor {charNum}...";
+                UpdateSlotUi();
+
                 AddLog($"[REMOTE] Memulai ganti karakter Slot {slotNum} ke Karakter {charNum}...");
 
                 var result = await CharacterSwitcherService.SwitchCharacterAsync(
@@ -1719,6 +2101,10 @@ public partial class MainWindow : Window
                     },
                     _config.CharSwitch);
 
+                // Pulihkan status berdasarkan hasil switch
+                slot.Status = result.success ? ClientStatus.Alive : previousStatus;
+                UpdateSlotUi();
+
                 if (wasAutoTabEnabled)
                 {
                     SetAutoTabSlot(slotNum, true);
@@ -1726,6 +2112,65 @@ public partial class MainWindow : Window
                 }
 
                 AddLog($"[REMOTE] Hasil pergantian karakter Slot {slotNum}: {(result.success ? "SUKSES" : "GAGAL")}");
+                return result;
+            });
+        };
+
+        _telegramListener.OnEnterSml = (slotNum, smlLv, floorTarget) =>
+        {
+            return Dispatcher.Invoke(async () =>
+            {
+                int idx = slotNum - 1;
+                if (idx < 0 || idx >= _slots.Count)
+                {
+                    return (false, null, $"❌ Slot {slotNum} tidak valid.");
+                }
+
+                var slot = _slots[idx];
+                if (slot.WindowHandle == 0 || slot.Status == ClientStatus.Offline)
+                {
+                    return (false, null, $"❌ Slot {slotNum} offline / jendela tidak ditemukan.");
+                }
+
+                bool wasAutoTabEnabled = slot.IsAutoTabEnabled;
+                if (wasAutoTabEnabled)
+                {
+                    SetAutoTabSlot(slotNum, false);
+                    AddLog($"[REMOTE] Auto TAB Slot {slotNum} di-pause sementara untuk masuk SML.");
+                }
+
+                var previousStatus = slot.Status;
+                slot.Status = ClientStatus.Switching;
+                slot.LastInfo = $"🏰 Masuk SML Lv {smlLv} ({floorTarget})...";
+                UpdateSlotUi();
+
+                AddLog($"[REMOTE] Memulai masuk SML Slot {slotNum}: Level {smlLv}, Floor {floorTarget}...");
+
+                var result = await SmlService.EnterSmlAsync(
+                    slot.WindowHandle,
+                    slotNum,
+                    smlLv,
+                    floorTarget,
+                    slot.WindowTitle,
+                    (hWnd, sc, hold) => SendHardwareKey(hWnd, sc, hold),
+                    () =>
+                    {
+                        var (color, _) = PixelHealthScanner.SampleHpColor(slot.WindowHandle, _config.HpOffsetX, _config.HpOffsetY);
+                        return PixelHealthScanner.IsHpAlive(color);
+                    },
+                    _config.Sml,
+                    msg => AddLog(msg));
+
+                slot.Status = result.success ? ClientStatus.Alive : previousStatus;
+                UpdateSlotUi();
+
+                if (wasAutoTabEnabled)
+                {
+                    SetAutoTabSlot(slotNum, true);
+                    AddLog($"[REMOTE] Auto TAB Slot {slotNum} dipulihkan (ON).");
+                }
+
+                AddLog($"[REMOTE] Hasil masuk SML Slot {slotNum}: {(result.success ? "SUKSES" : "GAGAL")}");
                 return result;
             });
         };

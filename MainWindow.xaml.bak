@@ -1,4 +1,4 @@
-<Window x:Class="GameBotMonitor.MainWindow"
+﻿?<Window x:Class="GameBotMonitor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Grand Fantasia Bot Health Monitor"
@@ -146,7 +146,7 @@
             <!-- Card Slot 1 -->
             <Border Grid.Column="0" Style="{StaticResource CardBorder}" Padding="0" ClipToBounds="True">
                 <Grid>
-                    <!-- Background HUD Image Layer → HorizontalAlignment Left agar avatar karakter selalu tampil di sisi kiri -->
+                    <!-- Background HUD Image Layer â�,��?� HorizontalAlignment Left agar avatar karakter selalu tampil di sisi kiri -->
                     <Image x:Name="ImgCardBg1" Stretch="UniformToFill" HorizontalAlignment="Left" Opacity="0.85" Visibility="Collapsed"/>
                     <!-- Dark Gradient Overlay for optimal readability -->
                     <Border x:Name="OverlayCardBg1" Visibility="Collapsed">
@@ -184,7 +184,7 @@
                         </Grid>
                         <TextBlock x:Name="TxtTitle1" Text="Menunggu Client..." FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,8" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
 
-                        <!-- Health Color Indicator → swatch + hex tanpa label teks redundan -->
+                        <!-- Health Color Indicator â�,��?� swatch + hex tanpa label teks redundan -->
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -196,12 +196,12 @@
 
                         <TextBlock x:Name="TxtInfo1" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,8"/>
 
-                        <!-- Status Badge → dipindah ke bawah info, tepat di atas Auto TAB -->
+                        <!-- Status Badge â�,��?� dipindah ke bawah info, tepat di atas Auto TAB -->
                         <Border x:Name="BadgeBorder1" Background="#424242" CornerRadius="6" Padding="10,6" Margin="0,0,0,8">
                             <TextBlock x:Name="BadgeText1" Text="&#x25CB; OFFLINE" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFFFFF"/>
                         </Border>
 
-                        <!-- Auto TAB Assist Per-Slot Toggle & Test → label diringkas jadi ikon saja -->
+                        <!-- Auto TAB Assist Per-Slot Toggle & Test â�,��?� label diringkas jadi ikon saja -->
                         <Border Background="#252538" CornerRadius="6" Padding="8,4">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -210,8 +210,8 @@
                                     <ColumnDefinition Width="6"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock x:Name="LblAutoTabSlot1" Text="🎯" FontSize="13" Foreground="#BAC2DE" VerticalAlignment="Center" ToolTip="Auto TAB: kirim tombol TAB otomatis ke game saat tidak ada target monster"/>
-                                <Button x:Name="BtnAutoTabSlot1" Grid.Column="1" Content="○ OFF" Width="52" Height="22"
+                                <TextBlock x:Name="LblAutoTabSlot1" Text="ðŸŽ¯" FontSize="13" Foreground="#BAC2DE" VerticalAlignment="Center" ToolTip="Auto TAB: kirim tombol TAB otomatis ke game saat tidak ada target monster"/>
+                                <Button x:Name="BtnAutoTabSlot1" Grid.Column="1" Content="â�?"�?� OFF" Width="52" Height="22"
                                         Tag="1" Click="BtnToggleAutoTabSlot_Click"
                                         Background="#45475A" Foreground="#CDD6F4" FontWeight="SemiBold" FontSize="10"
                                         BorderThickness="0" Cursor="Hand">
@@ -223,7 +223,7 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                                <Button x:Name="BtnTestTabSlot1" Grid.Column="3" Content="⚡ Test" Width="48" Height="22"
+                                <Button x:Name="BtnTestTabSlot1" Grid.Column="3" Content="âš¡ Test" Width="48" Height="22"
                                         Tag="1" Click="BtnTestTabSlot_Click"
                                         Background="#313244" Foreground="#89B4FA" FontWeight="SemiBold" FontSize="10"
                                         BorderThickness="0" Cursor="Hand" ToolTip="Kirim 1x tombol TAB ke jendela game Slot 1">
@@ -244,7 +244,7 @@
             <!-- Card Slot 2 -->
             <Border Grid.Column="2" Style="{StaticResource CardBorder}" Padding="0" ClipToBounds="True">
                 <Grid>
-                    <!-- Background HUD Image Layer → HorizontalAlignment Left agar avatar karakter selalu tampil di sisi kiri -->
+                    <!-- Background HUD Image Layer â�,��?� HorizontalAlignment Left agar avatar karakter selalu tampil di sisi kiri -->
                     <Image x:Name="ImgCardBg2" Stretch="UniformToFill" HorizontalAlignment="Left" Opacity="0.85" Visibility="Collapsed"/>
                     <!-- Dark Gradient Overlay for optimal readability -->
                     <Border x:Name="OverlayCardBg2" Visibility="Collapsed">
@@ -282,7 +282,7 @@
                         </Grid>
                         <TextBlock x:Name="TxtTitle2" Text="Menunggu Client..." FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,8" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
 
-                        <!-- Health Color Indicator → swatch + hex tanpa label teks redundan -->
+                        <!-- Health Color Indicator â�,��?� swatch + hex tanpa label teks redundan -->
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -294,12 +294,12 @@
 
                         <TextBlock x:Name="TxtInfo2" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,8"/>
 
-                        <!-- Status Badge → dipindah ke bawah info, tepat di atas Auto TAB -->
+                        <!-- Status Badge â�,��?� dipindah ke bawah info, tepat di atas Auto TAB -->
                         <Border x:Name="BadgeBorder2" Background="#424242" CornerRadius="6" Padding="10,6" Margin="0,0,0,8">
                             <TextBlock x:Name="BadgeText2" Text="&#x25CB; OFFLINE" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFFFFF"/>
                         </Border>
 
-                        <!-- Auto TAB Assist Per-Slot Toggle & Test → label diringkas jadi ikon saja -->
+                        <!-- Auto TAB Assist Per-Slot Toggle & Test â�,��?� label diringkas jadi ikon saja -->
                         <Border Background="#252538" CornerRadius="6" Padding="8,4">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -308,8 +308,8 @@
                                     <ColumnDefinition Width="6"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock x:Name="LblAutoTabSlot2" Text="🎯" FontSize="13" Foreground="#BAC2DE" VerticalAlignment="Center" ToolTip="Auto TAB: kirim tombol TAB otomatis ke game saat tidak ada target monster"/>
-                                <Button x:Name="BtnAutoTabSlot2" Grid.Column="1" Content="○ OFF" Width="52" Height="22"
+                                <TextBlock x:Name="LblAutoTabSlot2" Text="ðŸŽ¯" FontSize="13" Foreground="#BAC2DE" VerticalAlignment="Center" ToolTip="Auto TAB: kirim tombol TAB otomatis ke game saat tidak ada target monster"/>
+                                <Button x:Name="BtnAutoTabSlot2" Grid.Column="1" Content="â�?"�?� OFF" Width="52" Height="22"
                                         Tag="2" Click="BtnToggleAutoTabSlot_Click"
                                         Background="#45475A" Foreground="#CDD6F4" FontWeight="SemiBold" FontSize="10"
                                         BorderThickness="0" Cursor="Hand">
@@ -321,7 +321,7 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                                <Button x:Name="BtnTestTabSlot2" Grid.Column="3" Content="⚡ Test" Width="48" Height="22"
+                                <Button x:Name="BtnTestTabSlot2" Grid.Column="3" Content="âš¡ Test" Width="48" Height="22"
                                         Tag="2" Click="BtnTestTabSlot_Click"
                                         Background="#313244" Foreground="#89B4FA" FontWeight="SemiBold" FontSize="10"
                                         BorderThickness="0" Cursor="Hand" ToolTip="Kirim 1x tombol TAB ke jendela game Slot 2">
@@ -342,7 +342,7 @@
             <!-- Card Slot 3 -->
             <Border Grid.Column="4" Style="{StaticResource CardBorder}" Padding="0" ClipToBounds="True">
                 <Grid>
-                    <!-- Background HUD Image Layer → HorizontalAlignment Left agar avatar karakter selalu tampil di sisi kiri -->
+                    <!-- Background HUD Image Layer â�,��?� HorizontalAlignment Left agar avatar karakter selalu tampil di sisi kiri -->
                     <Image x:Name="ImgCardBg3" Stretch="UniformToFill" HorizontalAlignment="Left" Opacity="0.85" Visibility="Collapsed"/>
                     <!-- Dark Gradient Overlay for optimal readability -->
                     <Border x:Name="OverlayCardBg3" Visibility="Collapsed">
@@ -380,7 +380,7 @@
                         </Grid>
                         <TextBlock x:Name="TxtTitle3" Text="Menunggu Client..." FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,8" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
 
-                        <!-- Health Color Indicator → swatch + hex tanpa label teks redundan -->
+                        <!-- Health Color Indicator â�,��?� swatch + hex tanpa label teks redundan -->
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -392,12 +392,12 @@
 
                         <TextBlock x:Name="TxtInfo3" Text="Belum ada pemindaian" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,8"/>
 
-                        <!-- Status Badge → dipindah ke bawah info, tepat di atas Auto TAB -->
+                        <!-- Status Badge â�,��?� dipindah ke bawah info, tepat di atas Auto TAB -->
                         <Border x:Name="BadgeBorder3" Background="#424242" CornerRadius="6" Padding="10,6" Margin="0,0,0,8">
                             <TextBlock x:Name="BadgeText3" Text="&#x25CB; OFFLINE" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FFFFFF"/>
                         </Border>
 
-                        <!-- Auto TAB Assist Per-Slot Toggle & Test → label diringkas jadi ikon saja -->
+                        <!-- Auto TAB Assist Per-Slot Toggle & Test â�,��?� label diringkas jadi ikon saja -->
                         <Border Background="#252538" CornerRadius="6" Padding="8,4">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -406,8 +406,8 @@
                                     <ColumnDefinition Width="6"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock x:Name="LblAutoTabSlot3" Text="🎯" FontSize="13" Foreground="#BAC2DE" VerticalAlignment="Center" ToolTip="Auto TAB: kirim tombol TAB otomatis ke game saat tidak ada target monster"/>
-                                <Button x:Name="BtnAutoTabSlot3" Grid.Column="1" Content="○ OFF" Width="52" Height="22"
+                                <TextBlock x:Name="LblAutoTabSlot3" Text="ðŸŽ¯" FontSize="13" Foreground="#BAC2DE" VerticalAlignment="Center" ToolTip="Auto TAB: kirim tombol TAB otomatis ke game saat tidak ada target monster"/>
+                                <Button x:Name="BtnAutoTabSlot3" Grid.Column="1" Content="â�?"�?� OFF" Width="52" Height="22"
                                         Tag="3" Click="BtnToggleAutoTabSlot_Click"
                                         Background="#45475A" Foreground="#CDD6F4" FontWeight="SemiBold" FontSize="10"
                                         BorderThickness="0" Cursor="Hand">
@@ -419,7 +419,7 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                                <Button x:Name="BtnTestTabSlot3" Grid.Column="3" Content="⚡ Test" Width="48" Height="22"
+                                <Button x:Name="BtnTestTabSlot3" Grid.Column="3" Content="âš¡ Test" Width="48" Height="22"
                                         Tag="3" Click="BtnTestTabSlot_Click"
                                         Background="#313244" Foreground="#89B4FA" FontWeight="SemiBold" FontSize="10"
                                         BorderThickness="0" Cursor="Hand" ToolTip="Kirim 1x tombol TAB ke jendela game Slot 3">
@@ -485,7 +485,7 @@
                                     <ColumnDefinition Width="8"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="⚡ Test Perintah:" FontWeight="SemiBold" FontSize="12" Foreground="#89B4FA" VerticalAlignment="Center"/>
+                                <TextBlock Text="âš¡ Test Perintah:" FontWeight="SemiBold" FontSize="12" Foreground="#89B4FA" VerticalAlignment="Center"/>
                                 <ComboBox x:Name="CmbTestCommand" Grid.Column="2" IsEditable="True" Height="30" VerticalContentAlignment="Center"
                                           Background="#11111B" Foreground="#11111B" BorderBrush="#45475A">
                                     <ComboBoxItem Content="char2 1" IsSelected="True"/>
@@ -517,7 +517,7 @@
                                     <ComboBoxItem Content="tab3on"/>
                                     <ComboBoxItem Content="tab3off"/>
                                 </ComboBox>
-                                <Button x:Name="BtnRunTestCommand" Grid.Column="4" Content="▶ Jalankan (Run)" Width="130" Height="30"
+                                <Button x:Name="BtnRunTestCommand" Grid.Column="4" Content="â�?"¶ Jalankan (Run)" Width="130" Height="30"
                                         Style="{StaticResource PrimaryButton}" Click="BtnRunTestCommand_Click"/>
                             </Grid>
                         </Border>
@@ -584,7 +584,7 @@
                             <Separator Background="#313244" Margin="0,0,0,16"/>
 
                             <!-- Group 3: Deteksi Kesehatan & Waktu Pindai -->
-                            <TextBlock x:Name="SecDetectionHeader" Text="⏱️ Deteksi Kesehatan &amp; Waktu Pindai" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="SecDetectionHeader" Text="â±ï¸ Deteksi Kesehatan &amp; Waktu Pindai" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -637,7 +637,7 @@
                             <Separator Background="#313244" Margin="0,0,0,16"/>
 
                             <!-- Group 4: Auto Assist Target (Auto TAB) -->
-                            <TextBlock x:Name="SecAutoTabHeader" Text="🎯 Auto Assist Target (Auto TAB)" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="SecAutoTabHeader" Text="ðŸŽ¯ Auto Assist Target (Auto TAB)" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
                             <CheckBox x:Name="ChkAutoTabEnabled" Content="Aktifkan Fitur Auto Assist Target (Tekan TAB Otomatis)" IsChecked="True" Margin="0,0,0,4"/>
                             <TextBlock x:Name="HintAutoTab" Text="Membantu menargetkan monster saat bot idle/kehilangan target" FontSize="10" Foreground="#6C7086" Margin="0,0,0,12"/>
 
@@ -692,13 +692,13 @@
                                     <TextBlock x:Name="HintAutoTabCoords" Text="Titik sampling HUD target monster (tengah atas)" FontSize="10" Foreground="#6C7086" Margin="0,2,0,0"/>
                                 </StackPanel>
 
-                                <Button x:Name="BtnCalibrateTarget" Grid.Column="2" VerticalAlignment="Center" Content="🎯 Kalibrasi Target" Style="{StaticResource ModernButton}" Click="BtnCalibrateTarget_Click" Margin="0,14,0,0"/>
+                                <Button x:Name="BtnCalibrateTarget" Grid.Column="2" VerticalAlignment="Center" Content="?? Kalibrasi Target" Style="{StaticResource ModernButton}" Click="BtnCalibrateTarget_Click" Margin="0,14,0,0"/>
                             </Grid>
 
                             <Separator Background="#313244" Margin="0,0,0,16"/>
 
                             <!-- Group 5: Mode Diagnostik & Debug -->
-                            <TextBlock x:Name="SecDiagnosticsHeader" Text="🛠️ Mode Diagnostik &amp; Debug" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="SecDiagnosticsHeader" Text="ðŸ�?� ï¸ Mode Diagnostik &amp; Debug" FontWeight="Bold" FontSize="14" Foreground="#89B4FA" Margin="0,0,0,8"/>
                             <StackPanel Margin="0,0,0,16">
                                 <CheckBox x:Name="ChkEnableDebugLog" Content="Aktifkan Mode Debug Log (Tampilkan detail teknis pixel target &amp; input)" IsChecked="False" Margin="0,0,0,4"/>
                                 <TextBlock x:Name="HintEnableDebugLog" Text="Jika aktif, koordinat &amp; warna HEX sampling target akan dimunculkan ke log tiap beberapa detik" FontSize="10" Foreground="#6C7086"/>
@@ -866,19 +866,19 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0">
-                                            <TextBlock Text="Prev ◀ X (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBlock Text="Prev â�?"�,� X (%):" FontSize="10" Foreground="#A6ADC8"/>
                                             <TextBox x:Name="TxtPagePrevPercentX" Text="73.8"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="2">
-                                            <TextBlock Text="Prev ◀ Y (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBlock Text="Prev â�?"�,� Y (%):" FontSize="10" Foreground="#A6ADC8"/>
                                             <TextBox x:Name="TxtPagePrevPercentY" Text="77.2"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="4">
-                                            <TextBlock Text="Next ▶ X (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBlock Text="Next â�?"¶ X (%):" FontSize="10" Foreground="#A6ADC8"/>
                                             <TextBox x:Name="TxtPageNextPercentX" Text="84.4"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="6">
-                                            <TextBlock Text="Next ▶ Y (%):" FontSize="10" Foreground="#A6ADC8"/>
+                                            <TextBlock Text="Next â�?"¶ Y (%):" FontSize="10" Foreground="#A6ADC8"/>
                                             <TextBox x:Name="TxtPageNextPercentY" Text="77.2"/>
                                         </StackPanel>
                                     </Grid>
@@ -899,7 +899,7 @@
                                             <ComboBoxItem Content="Slot 2 (Tengah)"/>
                                             <ComboBoxItem Content="Slot 3 (Kanan)"/>
                                         </ComboBox>
-                                        <Button x:Name="BtnShowCharCalibrationOverlay" Grid.Column="4" Content="👁️ Tampilkan Posisi Karakter di Layar Game" 
+                                        <Button x:Name="BtnShowCharCalibrationOverlay" Grid.Column="4" Content="�Y'�️ Tampilkan Posisi Karakter di Layar Game" 
                                                 Height="30" FontWeight="Bold" FontSize="11"
                                                 Background="#313244" Foreground="#CBA6F7" BorderBrush="#CBA6F7" BorderThickness="1"
                                                 Cursor="Hand" Click="BtnShowCharCalibrationOverlay_Click"
@@ -914,9 +914,9 @@
                                             <ColumnDefinition Width="8"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Button x:Name="BtnCalibrateLogout" Grid.Column="0" Content="🎯 Kalibrasi Logout" Style="{StaticResource ModernButton}" Click="BtnCalibrateLogout_Click" ToolTip="Buka menu ESC di game, lalu klik tombol ini untuk menandai posisi tombol Logout"/>
-                                        <Button x:Name="BtnCalibrateReturn" Grid.Column="2" Content="🎯 Kalibrasi Return" Style="{StaticResource ModernButton}" Click="BtnCalibrateReturn_Click" ToolTip="Munculkan dialog Quit countdown di game, lalu klik tombol ini untuk menandai posisi tombol Return"/>
-                                        <Button x:Name="BtnCalibrateStartGame" Grid.Column="4" Content="🎯 Kalibrasi Start" Style="{StaticResource ModernButton}" Click="BtnCalibrateStartGame_Click" ToolTip="Di layar pemilihan karakter, klik tombol ini untuk menandai posisi tombol Start Game"/>
+                                        <Button x:Name="BtnCalibrateLogout" Grid.Column="0" Content="ðŸŽ¯ Kalibrasi Logout" Style="{StaticResource ModernButton}" Click="BtnCalibrateLogout_Click" ToolTip="Buka menu ESC di game, lalu klik tombol ini untuk menandai posisi tombol Logout"/>
+                                        <Button x:Name="BtnCalibrateReturn" Grid.Column="2" Content="ðŸŽ¯ Kalibrasi Return" Style="{StaticResource ModernButton}" Click="BtnCalibrateReturn_Click" ToolTip="Munculkan dialog Quit countdown di game, lalu klik tombol ini untuk menandai posisi tombol Return"/>
+                                        <Button x:Name="BtnCalibrateStartGame" Grid.Column="4" Content="ðŸŽ¯ Kalibrasi Start" Style="{StaticResource ModernButton}" Click="BtnCalibrateStartGame_Click" ToolTip="Di layar pemilihan karakter, klik tombol ini untuk menandai posisi tombol Start Game"/>
                                     </Grid>
                                     <Grid Margin="0,0,0,4">
                                         <Grid.ColumnDefinitions>
@@ -926,9 +926,9 @@
                                             <ColumnDefinition Width="8"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Button x:Name="BtnCalibrateCard1" Grid.Column="0" Content="🎯 Kalibrasi Card 1" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard1_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 1"/>
-                                        <Button x:Name="BtnCalibrateCard2" Grid.Column="2" Content="🎯 Kalibrasi Card 2" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard2_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 2"/>
-                                        <Button x:Name="BtnCalibrateCard3" Grid.Column="4" Content="🎯 Kalibrasi Card 3" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard3_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 3"/>
+                                        <Button x:Name="BtnCalibrateCard1" Grid.Column="0" Content="ðŸŽ¯ Kalibrasi Card 1" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard1_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 1"/>
+                                        <Button x:Name="BtnCalibrateCard2" Grid.Column="2" Content="ðŸŽ¯ Kalibrasi Card 2" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard2_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 2"/>
+                                        <Button x:Name="BtnCalibrateCard3" Grid.Column="4" Content="ðŸŽ¯ Kalibrasi Card 3" Style="{StaticResource ModernButton}" Click="BtnCalibrateCard3_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik Kartu Karakter 3"/>
                                     </Grid>
                                     <Grid Margin="0,0,0,8">
                                         <Grid.ColumnDefinitions>
@@ -936,8 +936,8 @@
                                             <ColumnDefinition Width="8"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Button x:Name="BtnCalibratePagePrev" Grid.Column="0" Content="🎯 Kalibrasi Panah Prev ◀" Style="{StaticResource ModernButton}" Click="BtnCalibratePagePrev_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik tombol panah ◀"/>
-                                        <Button x:Name="BtnCalibratePageNext" Grid.Column="2" Content="🎯 Kalibrasi Panah Next ▶" Style="{StaticResource ModernButton}" Click="BtnCalibratePageNext_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik tombol panah ▶"/>
+                                        <Button x:Name="BtnCalibratePagePrev" Grid.Column="0" Content="ðŸŽ¯ Kalibrasi Panah Prev â�?"�,�" Style="{StaticResource ModernButton}" Click="BtnCalibratePagePrev_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik tombol panah â�?"�,�"/>
+                                        <Button x:Name="BtnCalibratePageNext" Grid.Column="2" Content="ðŸŽ¯ Kalibrasi Panah Next â�?"¶" Style="{StaticResource ModernButton}" Click="BtnCalibratePageNext_Click" ToolTip="Di layar karakter, klik tombol ini lalu klik tombol panah â�?"¶"/>
                                     </Grid>
 
                                     <TextBlock Text="*Catatan: Anda bisa klik tombol 'Kalibrasi' di atas untuk mengklik langsung tombol target di jendela game secara visual." FontSize="10" Foreground="#6C7086"/>
@@ -949,7 +949,7 @@
                             <!-- Group Sprite Magic Land (SML) Automation & Calibration -->
                             <Border Background="#11111B" CornerRadius="8" Padding="12" Margin="0,0,0,16">
                                 <StackPanel>
-                                    <TextBlock Text="🏰 Pengaturan &amp; Kalibrasi Clear SML (Sprite Magic Land):" FontWeight="SemiBold" FontSize="12" Foreground="#89B4FA" Margin="0,0,0,4"/>
+                                    <TextBlock Text="ðŸ° Pengaturan &amp; Kalibrasi Clear SML (Sprite Magic Land):" FontWeight="SemiBold" FontSize="12" Foreground="#89B4FA" Margin="0,0,0,4"/>
                                     <TextBlock Text="Otomasi membuka menu dungeon (Hotkey), memilih tab SML, level 1-4, navigasi lantai menara, dan masuk dungeon via perintah Telegram (/sml 1 1 max, sml_1_1_-2, dll)." FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,10"/>
 
                                     <!-- Hotkey & Tab Koordinat -->
@@ -1091,7 +1091,7 @@
                                             <ComboBoxItem Content="Slot 2 (Tengah)"/>
                                             <ComboBoxItem Content="Slot 3 (Kanan)"/>
                                         </ComboBox>
-                                        <Button x:Name="BtnShowSmlCalibrationOverlay" Grid.Column="4" Content="🎯 Tampilkan Posisi SML di Layar Game" 
+                                        <Button x:Name="BtnShowSmlCalibrationOverlay" Grid.Column="4" Content="??? Tampilkan Posisi SML di Layar Game" 
                                                 Height="30" FontWeight="Bold" FontSize="11"
                                                 Background="#313244" Foreground="#89B4FA" BorderBrush="#89B4FA" BorderThickness="1"
                                                 Cursor="Hand" Click="BtnShowSmlCalibrationOverlay_Click"
@@ -1107,9 +1107,9 @@
                                             <ColumnDefinition Width="8"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Button x:Name="BtnCalibrateTabSml" Grid.Column="0" Content="🎯 Kalibrasi Tab SML" Style="{StaticResource ModernButton}" Click="BtnCalibrateTabSml_Click" ToolTip="Buka Dungeon Management, klik tombol ini lalu klik Tab 'Sprite Magic Land'"/>
-                                        <Button x:Name="BtnCalibrateSmlTower" Grid.Column="2" Content="🎯 Kalibrasi Area Menara" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlTower_Click" ToolTip="Di tab SML, klik tombol ini lalu klik area tengah menara"/>
-                                        <Button x:Name="BtnCalibrateSmlEnter" Grid.Column="4" Content="🎯 Kalibrasi Tombol Enter" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlEnter_Click" ToolTip="Di tab SML, klik tombol ini lalu klik tombol 'Enter the...'"/>
+                                        <Button x:Name="BtnCalibrateTabSml" Grid.Column="0" Content="?? Kalibrasi Tab SML" Style="{StaticResource ModernButton}" Click="BtnCalibrateTabSml_Click" ToolTip="Buka Dungeon Management, klik tombol ini lalu klik Tab 'Sprite Magic Land'"/>
+                                        <Button x:Name="BtnCalibrateSmlTower" Grid.Column="2" Content="?? Kalibrasi Area Menara" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlTower_Click" ToolTip="Di tab SML, klik tombol ini lalu klik area tengah menara"/>
+                                        <Button x:Name="BtnCalibrateSmlEnter" Grid.Column="4" Content="?? Kalibrasi Tombol Enter" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlEnter_Click" ToolTip="Di tab SML, klik tombol ini lalu klik tombol 'Enter the...'"/>
                                     </Grid>
                                     <Grid Margin="0,0,0,4">
                                         <Grid.ColumnDefinitions>
@@ -1123,11 +1123,11 @@
                                             <ColumnDefinition Width="6"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Button x:Name="BtnCalibrateSmlLv1" Grid.Column="0" Content="🎯 Kalibrasi Lv 1" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlLv1_Click" FontSize="11" ToolTip="Klik card SML Level 1 di panel kiri"/>
-                                        <Button x:Name="BtnCalibrateSmlLv2" Grid.Column="2" Content="🎯 Kalibrasi Lv 2" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlLv2_Click" FontSize="11" ToolTip="Klik card SML Level 2 di panel kiri"/>
-                                        <Button x:Name="BtnCalibrateSmlLv3" Grid.Column="4" Content="🎯 Kalibrasi Lv 3" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlLv3_Click" FontSize="11" ToolTip="Klik card SML Level 3 di panel kiri"/>
-                                        <Button x:Name="BtnCalibrateSmlLv4" Grid.Column="6" Content="🎯 Kalibrasi Lv 4" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlLv4_Click" FontSize="11" ToolTip="Klik card SML Level 4 di panel kiri"/>
-                                        <Button x:Name="BtnCalibrateSmlGate" Grid.Column="8" Content="🎯 Kalibrasi Gerbang" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlGate_Click" FontSize="11" ToolTip="Klik gerbang lantai aktif di menara"/>
+                                        <Button x:Name="BtnCalibrateSmlLv1" Grid.Column="0" Content="ðŸŽ¯ Kalibrasi Lv 1" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlLv1_Click" FontSize="11" ToolTip="Klik card SML Level 1 di panel kiri"/>
+                                        <Button x:Name="BtnCalibrateSmlLv2" Grid.Column="2" Content="ðŸŽ¯ Kalibrasi Lv 2" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlLv2_Click" FontSize="11" ToolTip="Klik card SML Level 2 di panel kiri"/>
+                                        <Button x:Name="BtnCalibrateSmlLv3" Grid.Column="4" Content="ðŸŽ¯ Kalibrasi Lv 3" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlLv3_Click" FontSize="11" ToolTip="Klik card SML Level 3 di panel kiri"/>
+                                        <Button x:Name="BtnCalibrateSmlLv4" Grid.Column="6" Content="ðŸŽ¯ Kalibrasi Lv 4" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlLv4_Click" FontSize="11" ToolTip="Klik card SML Level 4 di panel kiri"/>
+                                        <Button x:Name="BtnCalibrateSmlGate" Grid.Column="8" Content="ðŸŽ¯ Kalibrasi Gerbang" Style="{StaticResource ModernButton}" Click="BtnCalibrateSmlGate_Click" FontSize="11" ToolTip="Klik gerbang lantai aktif di menara"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
@@ -1139,9 +1139,9 @@
                                 <StackPanel>
                                     <TextBlock x:Name="SecStorageHeader" Text="Tangkapan Layar &amp; Pembersihan (Auto-Cleanup):" FontWeight="SemiBold" FontSize="12" Foreground="#F9E2AF"/>
                                     <CheckBox x:Name="ChkCropHudOnly" Content="Cukup kirim potongan bar darah / HUD karakter saja (Ukuran: 225x92 px)" IsChecked="True" Margin="0,8,0,6"/>
-                                    <TextBlock x:Name="TxtStorageInfo1" Text="• Tangkapan layar otomatis disimpan ke: Capture/yyyy/MM/dd/" FontSize="11" Foreground="#A6ADC8" Margin="0,2,0,0"/>
-                                    <TextBlock x:Name="TxtStorageInfo2" Text="• Otomatis menyimpan hanya 3 hari terakhir (folder lebih lama langsung dibersihkan)" FontSize="11" Foreground="#A6ADC8"/>
-                                    <TextBlock x:Name="TxtStorageInfo3" Text="• Di setiap folder harian, maksimal tersimpan 10 tangkapan layar terakhir" FontSize="11" Foreground="#A6ADC8"/>
+                                    <TextBlock x:Name="TxtStorageInfo1" Text="â�,�¢ Tangkapan layar otomatis disimpan ke: Capture/yyyy/MM/dd/" FontSize="11" Foreground="#A6ADC8" Margin="0,2,0,0"/>
+                                    <TextBlock x:Name="TxtStorageInfo2" Text="â�,�¢ Otomatis menyimpan hanya 3 hari terakhir (folder lebih lama langsung dibersihkan)" FontSize="11" Foreground="#A6ADC8"/>
+                                    <TextBlock x:Name="TxtStorageInfo3" Text="â�,�¢ Di setiap folder harian, maksimal tersimpan 10 tangkapan layar terakhir" FontSize="11" Foreground="#A6ADC8"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -1149,7 +1149,7 @@
 
                     <!-- Docked Bottom Save Button -->
                     <Border Grid.Row="1" Background="#181825" BorderBrush="#313244" BorderThickness="0,1,0,0" Padding="16,12">
-                        <Button x:Name="BtnSaveSettings" Content="💾 Simpan Semua Pengaturan" Height="40" FontSize="14" FontWeight="Bold" Style="{StaticResource PrimaryButton}" Click="BtnSaveSettings_Click"/>
+                        <Button x:Name="BtnSaveSettings" Content="ðŸ�?T¾ Simpan Semua Pengaturan" Height="40" FontSize="14" FontWeight="Bold" Style="{StaticResource PrimaryButton}" Click="BtnSaveSettings_Click"/>
                     </Border>
                 </Grid>
             </TabItem>

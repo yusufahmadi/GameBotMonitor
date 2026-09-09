@@ -53,17 +53,25 @@ public static class TelegramNotifier
         return await SendMessageAsync(botToken, chatId, text);
     }
 
-    public static async Task<bool> SendMessageAsync(string botToken, string chatId, string text)
+    public static async Task<bool> SendMessageAsync(string botToken, string chatId, string text, object? replyMarkup = null)
     {
         try
         {
             var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
-            var payload = new
-            {
-                chat_id = chatId,
-                text = text,
-                parse_mode = "Markdown"
-            };
+            object payload = replyMarkup != null
+                ? new
+                {
+                    chat_id = chatId,
+                    text = text,
+                    parse_mode = "Markdown",
+                    reply_markup = replyMarkup
+                }
+                : new
+                {
+                    chat_id = chatId,
+                    text = text,
+                    parse_mode = "Markdown"
+                };
 
             var json = JsonSerializer.Serialize(payload);
             using var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
@@ -73,6 +81,63 @@ public static class TelegramNotifier
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[TelegramNotifier] SendMessage error: {ex.Message}");
+            return false;
+        }
+    }
+
+    public static async Task<bool> AnswerCallbackQueryAsync(string botToken, string callbackQueryId, string? text = null)
+    {
+        try
+        {
+            var url = $"https://api.telegram.org/bot{botToken}/answerCallbackQuery";
+            var payload = new
+            {
+                callback_query_id = callbackQueryId,
+                text = text
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            using var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await HttpClient.PostAsync(url, content);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TelegramNotifier] AnswerCallbackQuery error: {ex.Message}");
+            return false;
+        }
+    }
+
+    public static async Task<bool> EditMessageTextAsync(string botToken, string chatId, long messageId, string text, object? replyMarkup = null)
+    {
+        try
+        {
+            var url = $"https://api.telegram.org/bot{botToken}/editMessageText";
+            object payload = replyMarkup != null
+                ? new
+                {
+                    chat_id = chatId,
+                    message_id = messageId,
+                    text = text,
+                    parse_mode = "Markdown",
+                    reply_markup = replyMarkup
+                }
+                : new
+                {
+                    chat_id = chatId,
+                    message_id = messageId,
+                    text = text,
+                    parse_mode = "Markdown"
+                };
+
+            var json = JsonSerializer.Serialize(payload);
+            using var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await HttpClient.PostAsync(url, content);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[TelegramNotifier] EditMessageText error: {ex.Message}");
             return false;
         }
     }

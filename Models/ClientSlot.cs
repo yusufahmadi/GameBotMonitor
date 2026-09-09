@@ -74,6 +74,7 @@ public class ClientSlot : INotifyPropertyChanged
         ClientStatus.Dead => LanguageService.Get("BadgeDead"),
         ClientStatus.Crashed => LanguageService.Get("BadgeCrashed"),
         ClientStatus.NotResponding => LanguageService.Get("BadgeNotResponding"),
+        ClientStatus.Switching => LanguageService.Get("BadgeSwitching"),
         _ => LanguageService.Get("BadgeOffline")
     };
 
@@ -83,6 +84,7 @@ public class ClientSlot : INotifyPropertyChanged
         ClientStatus.Dead => "#C62828",          // Red
         ClientStatus.Crashed => "#E65100",       // Dark Orange
         ClientStatus.NotResponding => "#F57F17",  // Amber
+        ClientStatus.Switching => "#6A1B9A",     // Deep Purple — Switching
         _ => "#424242"                           // Gray
     };
 
